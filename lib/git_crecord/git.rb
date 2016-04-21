@@ -32,6 +32,10 @@ module GitCrecord
 #     return s.str();
 # }
 
+    def self.diff
+      `git diff --no-ext-diff --no-color`
+    end
+
     def self.toplevel_dir
       `git rev-parse --show-toplevel`.chomp
     end
