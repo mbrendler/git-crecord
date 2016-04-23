@@ -4,7 +4,7 @@ require_relative 'color'
 module GitCrecord
   module UI
     class HunksWindow
-      SELECTED_MAP = {true => 'X', false => ' ', :partly => '~'}
+      SELECTED_MAP = {true => 'X', false => ' ', :partly => '~'}.freeze
 
       def initialize(win, files)
         @win = win
