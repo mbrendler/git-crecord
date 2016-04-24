@@ -1,5 +1,6 @@
 require 'curses'
 require_relative 'color'
+require_relative '../git'
 
 module GitCrecord
   module UI
@@ -98,12 +99,12 @@ module GitCrecord
       end
 
       def stage
-        # stage
+        Git.stage(@files)
         quit
       end
 
       def commit
-        # commit if stage == true
+        Git.commit if Git.stage(@files) == true
         quit
       end
 
