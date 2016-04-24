@@ -23,7 +23,7 @@ module GitCrecord
       end
 
       def selected=(value)
-        subs.each{ |sub| sub.selected = value }
+        highlightable_subs.each{ |sub| sub.selected = value }
       end
     end
   end
