@@ -16,7 +16,7 @@ module GitCrecord
           file.write("code: #{status}\n")
         end
       end
-      status
+      status.success?
     end
 
     def self.diff
