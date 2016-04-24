@@ -10,6 +10,7 @@ module GitCrecord
         @filename_a = filename_a
         @filename_b = filename_b
         @hunks = []
+        @extra_lines = []
         @expanded = false
         super()
       end
@@ -36,6 +37,10 @@ module GitCrecord
 
       def add_hunk_line(line)
         @hunks.last << line
+      end
+
+      def add_extra_line(line)
+        @extra_lines << line
       end
 
       def subs

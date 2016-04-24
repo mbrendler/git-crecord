@@ -8,7 +8,7 @@ module GitCrecord
       files = []
       diff.lines.each do |line|
         line.chomp!
-        next if line.start_with?(*%w(index --- +++))
+        next files[-1].add_extra_line(line) if line.start_with?(*%w(index --- +++))
         next files << File.new(*parse_filenames(line)) if file_start?(line)
         next files[-1] << line if hunk_start?(line)
         files[-1].add_hunk_line(line)
