@@ -1,0 +1,20 @@
+Metrics/LineLength:
+  Max: 80
+
+Style/AlignParameters:
+  EnforcedStyle: with_fixed_indentation
+
+Style/SpaceInsideHashLiteralBraces:
+  EnforcedStyle: no_space
+
+Style/SpaceBeforeBlockBraces:
+  EnforcedStyle: no_space
+
+Style/NumericLiterals:
+  MinDigits: 666
+
+Documentation:
+  Enabled: false
+
+AllCops:
+  DisplayStyleGuide: true
