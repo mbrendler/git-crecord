@@ -1,23 +1,23 @@
+require 'open3'
+
 module GitCrecord
   module Git
-    # int stage(const Files& files) {
-    #     logger() << "stage" << std::endl;
-    #     std::stringstream s;
-    #     for (auto f : files) {
-    #         f->generate_diff(s);
-    #     }
-    #     FILE* cmd = popen("git apply --cached --unidiff-zero - ", "w");
-    #     const int rc = fputs(s.str().c_str(), cmd);
-    #     logger() << "fputs: " << rc << std::endl;
-    #     logger() << s.str().c_str() << std::endl;
-    #     const int status_code = pclose(cmd);
-    #     logger() << "pclose: " << rc << std::endl;
-    #     return status_code;
-    # }
-    #
-    # int commit() {
-    #     return system("git commit");
-    # }
+    def self.stage(files)
+      diff = files.map(&:generate_diff).join("\n")
+      content, status = Open3.capture2e(
+        'git apply --cached --unidiff-zero - ', stdin_data: diff
+      )
+      if status != 0
+        File.open(File.join(ENV['HOME'], '.git-crecord.log'), 'w') do |file|
+          file.write("git apply --cached --unidiff-zero -\n")
+          file.write("#{diff}\n")
+          file.write("#{diff.lines.size}\n")
+          file.write("stdout/stderr:\n#{content}\n")
+          file.write("code: #{status}\n")
+        end
+      end
+      status
+    end
 
     def self.diff
       `git diff --no-ext-diff --no-color`
