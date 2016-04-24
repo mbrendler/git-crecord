@@ -19,6 +19,10 @@ module GitCrecord
       status.success?
     end
 
+    def self.commit
+      system('git commit')
+    end
+
     def self.diff
       `git diff --no-ext-diff --no-color`
     end
