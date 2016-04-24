@@ -30,6 +30,12 @@ module GitCrecord
       def expanded
         false
       end
+
+      def generate_diff
+        return " #{@line[1..-1]}" if !selected && del?
+        return @line if selected
+        nil
+      end
     end
   end
 end
