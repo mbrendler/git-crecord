@@ -20,10 +20,11 @@ module GitCrecord
       def refresh
         Curses.refresh
         width = Curses.cols
-        @win.resize(height(width), width)
+        h = height(width)
+        @win.resize(h, width)
         @win.clear
         print_list(@files)
-        @win.refresh(scroll_position, 0, 0, 0, Curses.lines - 1, width)
+        @win.refresh(scroll_position(h), 0, 0, 0, Curses.lines - 1, width)
       end
 
       def height(width, hunks = @files)
@@ -32,11 +33,11 @@ module GitCrecord
         end
       end
 
-      def scroll_position
+      def scroll_position(h)
         if @scroll_position + 3 > @highlighted_y1
           @scroll_position = @highlighted_y1 - 3
         elsif @scroll_position - 4 + Curses.lines <= @highlighted_y2
-          @scroll_position = @highlighted_y2 + 4 - Curses.lines
+          @scroll_position = [@highlighted_y2 + 4, h].min - Curses.lines
         end
         @scroll_position
       end
