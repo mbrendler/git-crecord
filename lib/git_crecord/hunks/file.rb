@@ -53,14 +53,11 @@ module GitCrecord
 
       def generate_diff
         return unless selected
-        out_line_offset = 0
         [
           "diff --git a/#{@filename_a} b/#{@filename_b}",
           *@extra_lines,
-          *subs.map do |sub|
-            content, out_line_offset = sub.generate_diff(out_line_offset)
-            content
-          end.compact
+          *subs.map(&:generate_diff).compact,
+          ''
         ].join("\n")
       end
     end

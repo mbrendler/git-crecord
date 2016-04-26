@@ -27,30 +27,26 @@ module GitCrecord
         @highlightable_subs ||= @lines.select(&:highlightable?)
       end
 
-      def generate_diff(out_line_offset = 0)
-        return [nil, out_line_offset] unless selected
-        header, out_line_offset = generate_header(out_line_offset)
-        content = [
-          header,
-          *subs.map(&:generate_diff).compact
-        ].join("\n")
-        [content, out_line_offset]
+      def generate_diff
+        return nil unless selected
+        [generate_header, *subs.map(&:generate_diff).compact].join("\n")
       end
 
-      def generate_header(out_line_offset)
-        old_start, old_count, new_start, new_count = @head.match(
-          /@@ -(\d+),(\d+) \+(\d+),(\d+) @@/
-        )[1..4].map(&:to_i)
-        new_start += out_line_offset
+      def generate_header
+        old_start, old_count, new_start, new_count = parse_header
         highlightable_subs.each do |sub|
           next if sub.selected
           new_count -= 1 if sub.add?
           new_count += 1 if sub.del?
         end
-        [
-          "@@ -#{old_start},#{old_count} +#{new_start},#{new_count} @@",
-          new_start + new_count
-        ]
+        "@@ -#{old_start},#{old_count} +#{new_start},#{new_count} @@"
+      end
+
+      def parse_header
+        (
+          @head.match(/@@ -(\d+),(\d+) \+(\d+),(\d+) @@/) ||
+          @head.match(/@@ -(\d+),(\d+) \+(\d+) @@/).to_a + [1]
+        )[1..4].map(&:to_i)
       end
     end
   end
