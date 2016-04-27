@@ -4,12 +4,12 @@ require 'open3'
 module GitCrecord
   module Git
     def self.stage(files)
-      selected_files = files.select{ |file| file.selected != false }
+      selected_files = files.select(&:selected)
       selected_files.select{ |file| file.type == :untracked }.each do |file|
         success = add_file(file.filename_a)
         raise "could not add file #{file.filename_a}" unless success
       end
-      diff = files.map(&:generate_diff).join("\n")
+      diff = selected_files.map(&:generate_diff).join("\n")
       cmd = 'git apply --cached --unidiff-zero - '
       content, status = Open3.capture2e(cmd, stdin_data: diff)
       LOGGER.info(cmd)
