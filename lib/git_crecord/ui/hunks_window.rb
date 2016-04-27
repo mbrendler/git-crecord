@@ -4,22 +4,22 @@ require_relative '../git'
 
 module GitCrecord
   module UI
+    class QuitAction
+      def initialize(&block)
+        @block = block
+      end
+
+      def call
+        @block.call
+      end
+
+      def ==(other)
+        :quit == other
+      end
+    end
+
     class HunksWindow
       SELECTED_MAP = {true => 'X', false => ' ', :partly => '~'}.freeze
-
-      class QuitAction
-        def initialize(&block)
-          @block = block
-        end
-
-        def call
-          @block.call
-        end
-
-        def ==(other)
-          :quit == other
-        end
-      end
 
       def initialize(win, files)
         @win = win
