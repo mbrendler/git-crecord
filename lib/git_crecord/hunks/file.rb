@@ -4,18 +4,23 @@ require_relative 'hunk'
 module GitCrecord
   module Hunks
     class File < HunkBase
+      attr_reader :filename_a
+      attr_reader :type
       attr_reader :hunks
 
-      def initialize(filename_a, filename_b)
+      def initialize(filename_a, filename_b, type: :modified)
         @filename_a = filename_a
         @filename_b = filename_b
+        @type = type
         @hunks = []
         @expanded = false
         super()
       end
 
       def to_s
-        @filename_a == @filename_b ? @filename_a : "#{filename_a} -> #{filename_b}"
+        prefix = {modified: 'M', untracked: '?'}.fetch(type)
+        return "#{prefix} #{@filename_a}" if @filename_a == @filename_b
+        "#{prefix} #{filename_a} -> #{filename_b}"
       end
 
       def info_string

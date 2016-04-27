@@ -132,10 +132,18 @@ popd # "$REPO_DIR"/sub
 
 git reset
 
-echo "a not selected file" # --------------------------------------------------
+echo "add a untracked file"
 echo "b_file line 1" > b_file.txt
-git add b_file.txt
+run_git_crecord 'AG s'
 git commit -m "add b_file"
+assert_diff '-This is the second line.
++This is line 2.
+-This is line 10.
+-This is line 11.
++This is the tenth line.
++This is the eleventh line.'
+
+echo "a not selected file" # --------------------------------------------------
 echo "b_file line 2" >> b_file.txt
 run_git_crecord "j s"
 assert_diff "+b_file line 2"

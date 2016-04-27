@@ -27,5 +27,17 @@ module GitCrecord
     def parse_filenames(line)
       line.match(%r{a/(.*) b/(.*)$})[1..2]
     end
+
+    def untracked_files(git_status)
+      git_status.lines.select{ |line| line.start_with?('??') }.map do |new_file|
+        filename = new_file.chomp[3..-1]
+        File.new(filename, filename, type: :untracked).tap do |file|
+          file_lines = ::File.readlines(filename)
+          file << "@@ -0,0 +1,#{file_lines.size} @@"
+          file_lines.each{ |line| file.add_hunk_line("+#{line.chomp}") }
+          file.selected = false
+        end
+      end
+    end
   end
 end
