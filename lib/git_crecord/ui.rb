@@ -42,7 +42,7 @@ module GitCrecord
         c = Curses.getch
         next if ACTIONS[c].nil?
         quit = win.send(ACTIONS[c])
-        break if quit == :quit
+        break quit if quit == :quit
         win.refresh
       end
     end

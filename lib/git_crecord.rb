@@ -7,7 +7,8 @@ module GitCrecord
 
   def main
     Dir.chdir(Git.toplevel_dir) do
-      UI.run(Hunks.parse(Git.diff))
+      result = UI.run(Hunks.parse(Git.diff))
+      return result.call == true if result.respond_to?(:call)
       0
     end
   end

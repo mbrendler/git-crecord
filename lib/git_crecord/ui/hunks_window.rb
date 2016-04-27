@@ -7,6 +7,20 @@ module GitCrecord
     class HunksWindow
       SELECTED_MAP = {true => 'X', false => ' ', :partly => '~'}.freeze
 
+      class QuitAction
+        def initialize(&block)
+          @block = block
+        end
+
+        def call
+          @block.call
+        end
+
+        def ==(other)
+          :quit == other
+        end
+      end
+
       def initialize(win, files)
         @win = win
         @files = files
@@ -100,13 +114,13 @@ module GitCrecord
       end
 
       def stage
-        Git.stage(@files)
-        quit
+        QuitAction.new{ Git.stage(@files) }
       end
 
       def commit
-        Git.commit if Git.stage(@files) == true
-        quit
+        QuitAction.new do
+          Git.commit if Git.stage(@files) == true
+        end
       end
 
       def highlight_next
