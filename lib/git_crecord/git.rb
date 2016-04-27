@@ -17,7 +17,7 @@ module GitCrecord
     end
 
     def self.commit
-      system('git commit')
+      exec('git commit')
     end
 
     def self.diff
