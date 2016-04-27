@@ -37,7 +37,7 @@ module GitCrecord
 
       def refresh
         width = Curses.cols
-        h = height(width)
+        h = [Curses.lines, height(width)].max
         @win.resize(h, width)
         @win.clear
         print_list(@files)
