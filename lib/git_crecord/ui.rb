@@ -6,6 +6,8 @@ module GitCrecord
   module UI
     ACTIONS = {
       'q' => :quit,
+      's' => :stage,
+      'c' => :commit,
       Curses::KEY_RESIZE => :nil?, # Do nothing but refresh screen
       'j' => :highlight_next,
       Curses::KEY_DOWN => :highlight_next,
@@ -19,9 +21,7 @@ module GitCrecord
       'g' => :highlight_first,
       'G' => :highlight_last,
       ' ' => :toggle_selection,
-      'A' => :toggle_all_selections,
-      's' => :stage,
-      'c' => :commit
+      'A' => :toggle_all_selections
     }.freeze
 
     def self.run(files)
@@ -30,8 +30,7 @@ module GitCrecord
       Curses.clear
       Curses.noecho
       Curses.curs_set(0)
-      win = HunksWindow.new(Curses::Pad.new(Curses.lines, Curses.cols), files)
-      run_loop(win)
+      run_loop(HunksWindow.new(Curses::Pad.new(1, 1), files))
     ensure
       Curses.close_screen
     end
