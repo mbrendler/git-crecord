@@ -37,7 +37,6 @@ module GitCrecord
     end
 
     def self.run_loop(win)
-      Curses.refresh
       win.refresh
       loop do
         c = Curses.getch

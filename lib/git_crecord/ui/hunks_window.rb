@@ -18,12 +18,12 @@ module GitCrecord
       end
 
       def refresh
-        Curses.refresh
         width = Curses.cols
         h = height(width)
         @win.resize(h, width)
         @win.clear
         print_list(@files)
+        Curses.refresh
         @win.refresh(scroll_position(h), 0, 0, 0, Curses.lines - 1, width)
       end
 
