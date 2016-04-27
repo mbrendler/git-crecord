@@ -10,7 +10,6 @@ module GitCrecord
         @filename_a = filename_a
         @filename_b = filename_b
         @hunks = []
-        @extra_lines = []
         @expanded = false
         super()
       end
@@ -39,10 +38,6 @@ module GitCrecord
         @hunks.last << line
       end
 
-      def add_extra_line(line)
-        @extra_lines << line
-      end
-
       def subs
         @hunks
       end
@@ -55,7 +50,8 @@ module GitCrecord
         return unless selected
         [
           "diff --git a/#{@filename_a} b/#{@filename_b}",
-          *@extra_lines,
+          "--- a/#{@filename_a}",
+          "+++ b/#{@filename_b}",
           *subs.map(&:generate_diff).compact,
           ''
         ].join("\n")
