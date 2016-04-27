@@ -31,6 +31,10 @@ module GitCrecord
         @scroll_position = 0
       end
 
+      def getch
+        @win.getch
+      end
+
       def refresh
         width = Curses.cols
         h = height(width)

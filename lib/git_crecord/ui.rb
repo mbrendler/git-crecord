@@ -38,7 +38,7 @@ module GitCrecord
     def self.run_loop(win)
       win.refresh
       loop do
-        c = Curses.getch
+        c = win.getch
         next if ACTIONS[c].nil?
         quit = win.send(ACTIONS[c])
         break quit if quit == :quit
