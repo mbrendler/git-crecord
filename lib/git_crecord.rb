@@ -7,7 +7,7 @@ module GitCrecord
   def self.main(argv)
     if argv.include?('--version')
       puts VERSION
-      0
+      true
     else
       run
     end
@@ -20,7 +20,7 @@ module GitCrecord
       return false if files.empty?
       result = UI.run(files)
       return result.call == true if result.respond_to?(:call)
-      0
+      true
     end
   end
 end
