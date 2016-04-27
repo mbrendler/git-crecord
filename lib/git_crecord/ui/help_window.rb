@@ -27,6 +27,7 @@ EOS
           win.addstr(line)
         end
         win.getch
+        win.close
       end
 
       def self.width
