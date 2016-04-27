@@ -1,5 +1,6 @@
 require 'curses'
 require_relative 'color'
+require_relative 'help_window'
 require_relative '../git'
 
 module GitCrecord
@@ -170,6 +171,10 @@ module GitCrecord
       def toggle_all_selections
         new_selected = @files[0].selected == false
         @files.each{ |file| file.selected = new_selected }
+      end
+
+      def help_window
+        HelpWindow.show
       end
     end
   end

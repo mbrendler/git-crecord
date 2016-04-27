@@ -21,7 +21,8 @@ module GitCrecord
       'g' => :highlight_first,
       'G' => :highlight_last,
       ' ' => :toggle_selection,
-      'A' => :toggle_all_selections
+      'A' => :toggle_all_selections,
+      '?' => :help_window
     }.freeze
 
     def self.run(files)
