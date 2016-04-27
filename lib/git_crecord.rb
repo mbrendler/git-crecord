@@ -5,7 +5,9 @@ require_relative 'git_crecord/ui'
 module GitCrecord
   def self.main
     Dir.chdir(Git.toplevel_dir) do
-      result = UI.run(Hunks.parse(Git.diff))
+      files = Hunks.parse(Git.diff)
+      return false if files.empty?
+      result = UI.run(files)
       return result.call == true if result.respond_to?(:call)
       0
     end
