@@ -2,15 +2,10 @@ require 'curses'
 require_relative 'color'
 require_relative 'help_window'
 require_relative '../git'
+require_relative '../quit_action'
 
 module GitCrecord
   module UI
-    class QuitAction < Proc
-      def ==(other)
-        :quit == other
-      end
-    end
-
     class HunksWindow
       SELECTED_MAP = {true => 'X', false => ' ', :partly => '~'}.freeze
 
