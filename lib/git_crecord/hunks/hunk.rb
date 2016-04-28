@@ -4,6 +4,8 @@ require_relative 'hunk_line'
 module GitCrecord
   module Hunks
     class Hunk < HunkBase
+      attr_accessor :y1, :y2
+
       def initialize(head)
         @head = head
         @lines = []
@@ -13,6 +15,10 @@ module GitCrecord
 
       def strings(width, **_)
         @head.scan(/.{1,#{width}}/)
+      end
+
+      def x_offset
+        3
       end
 
       def <<(line)

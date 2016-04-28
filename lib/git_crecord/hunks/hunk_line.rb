@@ -3,6 +3,7 @@ require_relative 'hunk_base'
 module GitCrecord
   module Hunks
     class HunkLine < HunkBase
+      attr_accessor :y1, :y2
       attr_accessor :selected
 
       def initialize(line)
@@ -13,6 +14,10 @@ module GitCrecord
 
       def strings(width, **_)
         @line.scan(/.{1,#{width}}/)
+      end
+
+      def x_offset
+        6
       end
 
       def add?

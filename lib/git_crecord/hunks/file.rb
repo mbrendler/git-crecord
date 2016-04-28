@@ -4,6 +4,7 @@ require_relative 'hunk'
 module GitCrecord
   module Hunks
     class File < HunkBase
+      attr_accessor :y1, :y2
       attr_reader :filename_a
       attr_reader :type
       attr_reader :hunks
@@ -33,6 +34,10 @@ module GitCrecord
         return result unless large
         result += info_string.scan(/.{1,#{width}}/)
         result << ''
+      end
+
+      def x_offset
+        0
       end
 
       def <<(hunk)
