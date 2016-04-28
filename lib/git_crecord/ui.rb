@@ -8,7 +8,6 @@ module GitCrecord
       'q' => :quit,
       's' => :stage,
       'c' => :commit,
-      Curses::KEY_RESIZE => :resize,
       'j' => :highlight_next,
       Curses::KEY_DOWN => :highlight_next,
       'k' => :highlight_previous,
@@ -22,7 +21,9 @@ module GitCrecord
       'G' => :highlight_last,
       ' ' => :toggle_selection,
       'A' => :toggle_all_selections,
-      '?' => :help_window
+      '?' => :help_window,
+      'R' => :redraw,
+      Curses::KEY_RESIZE => :resize
     }.freeze
 
     def self.run(files)

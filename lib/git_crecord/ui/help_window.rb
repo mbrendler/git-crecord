@@ -17,6 +17,7 @@ module GitCrecord
   SPACE  - toggle selection
   A      - toggle all selections
   ?      - this help window
+  R      - force redraw
 EOS
 
       def self.show
