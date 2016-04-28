@@ -30,6 +30,8 @@ module GitCrecord
         @highlighted_y1 = 0
         @highlighted_y2 = 0
         @scroll_position = 0
+
+        resize
       end
 
       def getch
@@ -37,13 +39,18 @@ module GitCrecord
       end
 
       def refresh
-        width = Curses.cols
-        h = [Curses.lines, height(width)].max
-        @win.resize(h, width)
         @win.clear
         print_list(@files)
-        Curses.refresh
-        @win.refresh(scroll_position(h), 0, 0, 0, Curses.lines - 1, width)
+        @win.refresh(scroll_position(@height), 0, 0, 0, Curses.lines - 1, @width)
+      end
+
+      def resize
+        new_height = [Curses.lines, height(Curses.cols)].max
+        return if @width == Curses.cols && @height == new_height
+        @width = Curses.cols
+        @height = new_height
+        @win.resize(@height, @width)
+        refresh
       end
 
       def height(width, hunks = @files)
@@ -129,19 +136,24 @@ module GitCrecord
       end
 
       def highlight_next
-        old = @highlighted
-        @highlighted = @visibles[@visibles.index(@highlighted) + 1] || old
+        to_highlight = @visibles[@visibles.index(@highlighted) + 1]
+        return if to_highlight.nil?
+        @highlighted = to_highlight
+        refresh
       end
 
       def highlight_previous
-        old_index = @visibles.index(@highlighted)
-        @highlighted = @visibles[old_index - 1] if old_index != 0
+        to_highlight = @visibles[@visibles.index(@highlighted) - 1]
+        return if to_highlight.nil?
+        @highlighted = to_highlight
+        refresh
       end
 
       def collapse
         return if @highlighted.is_a?(Hunks::HunkLine)
         @highlighted.expanded = false
         update_visibles
+        refresh
       end
 
       def expand
@@ -149,32 +161,41 @@ module GitCrecord
         @highlighted.expanded = true
         update_visibles
         @highlighted = @visibles[@visibles.index(@highlighted) + 1]
+        refresh
       end
 
       def toggle_fold
         @highlighted.expanded = !@highlighted.expanded
         update_visibles
+        refresh
       end
 
       def highlight_first
+        return if @highlighted == @visibles[0]
         @highlighted = @visibles[0]
+        refresh
       end
 
       def highlight_last
+        return if @highlighted == @visibles[-1]
         @highlighted = @visibles[-1]
+        refresh
       end
 
       def toggle_selection
         @highlighted.selected = !@highlighted.selected
+        refresh
       end
 
       def toggle_all_selections
         new_selected = @files[0].selected == false
         @files.each{ |file| file.selected = new_selected }
+        refresh
       end
 
       def help_window
         HelpWindow.show
+        refresh
       end
     end
   end

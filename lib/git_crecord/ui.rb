@@ -8,7 +8,7 @@ module GitCrecord
       'q' => :quit,
       's' => :stage,
       'c' => :commit,
-      Curses::KEY_RESIZE => :nil?, # Do nothing but refresh screen
+      Curses::KEY_RESIZE => :resize,
       'j' => :highlight_next,
       Curses::KEY_DOWN => :highlight_next,
       'k' => :highlight_previous,
@@ -37,13 +37,11 @@ module GitCrecord
     end
 
     def self.run_loop(win)
-      win.refresh
       loop do
         c = win.getch
         next if ACTIONS[c].nil?
         quit = win.send(ACTIONS[c])
         break quit if quit == :quit
-        win.refresh
       end
     end
   end
