@@ -27,8 +27,6 @@ module GitCrecord
         @files = files
         @visibles = @files
         @highlighted = @files[0]
-        @highlighted_y1 = 0
-        @highlighted_y2 = 0
         @scroll_position = 0
 
         resize
@@ -39,53 +37,66 @@ module GitCrecord
       end
 
       def refresh
+        @win.refresh(scroll_position, 0, 0, 0, Curses.lines - 1, @width)
+      end
+
+      def redraw
         @win.clear
+        @win.resize(@height, @width)
         print_list(@files)
-        @win.refresh(scroll_position(@height), 0, 0, 0, Curses.lines - 1, @width)
+        refresh
       end
 
       def resize
-        new_height = [Curses.lines, height(Curses.cols)].max
-        return if @width == Curses.cols && @height == new_height
-        @width = Curses.cols
+        new_width = Curses.cols
+        new_height = [Curses.lines, height(new_width)].max
+        return if @width == new_width && @height == new_height
+        @width = new_width
         @height = new_height
-        @win.resize(@height, @width)
-        refresh
+        redraw
       end
 
       def height(width, hunks = @files)
         hunks.reduce(0) do |h, entry|
-          h + entry.strings(width - 5).size + height(width - 3, entry.subs)
+          h + \
+            entry.strings(width - entry.x_offset - 5, large: true).size + \
+            height(width, entry.subs)
         end
       end
 
-      def scroll_position(h)
-        if @scroll_position + 3 > @highlighted_y1
-          @scroll_position = @highlighted_y1 - 3
-        elsif @scroll_position - 4 + Curses.lines <= @highlighted_y2
-          @scroll_position = [@highlighted_y2 + 4, h].min - Curses.lines
+      def scroll_position
+        if @scroll_position + 3 > @highlighted.y1
+          @scroll_position = @highlighted.y1 - 3
+        elsif @scroll_position - 4 + Curses.lines <= @highlighted.y2
+          @scroll_position = [@highlighted.y2 + 4, @height].min - Curses.lines
         end
         @scroll_position
       end
 
-      def print_list(list, width: Curses.cols, x_offset: 0, line_number: -1)
+      def move_highlight(to)
+        return if to == @highlighted || to.nil?
+        from = @highlighted
+        @highlighted = to
+        print_entry(from, from.y1 - 1)
+        print_entry(to, to.y1 - 1)
+        refresh
+      end
+
+      def print_list(list, line_number: -1)
         list.each do |entry|
-          line_number = print_entry(entry, width, x_offset, line_number)
+          line_number = print_entry(entry, line_number)
           next unless entry.expanded
-          line_number = print_list(
-            entry.subs,
-            width: width, x_offset: x_offset + 3, line_number: line_number
-          )
+          line_number = print_list(entry.subs, line_number: line_number)
         end
         line_number
       end
 
-      def print_entry(entry, width, x_offset, line_number)
+      def print_entry(entry, line_number)
         is_highlighted = entry == @highlighted
-        @highlighted_y1 = line_number + 1 if is_highlighted
-        entry.strings(width - x_offset - 5).each_with_index do |string, index|
+        entry.y1 = line_number + 1
+        entry.strings(@width - entry.x_offset - 5).each_with_index do |string, index|
           @win.attrset(entry.is_a?(Hunks::File) && is_highlighted ? attrs(entry) : 0)
-          @win.setpos(line_number += 1, x_offset)
+          @win.setpos(line_number += 1, entry.x_offset)
           if index == 0 && entry.selectable
             @win.addstr("[#{SELECTED_MAP.fetch(entry.selected)}]  ")
           else
@@ -93,11 +104,10 @@ module GitCrecord
           end
           @win.attrset(attrs(entry))
           @win.addstr(string)
-          add_spaces = (width - x_offset - 5 - string.size)
-          @win.addstr(' ' * add_spaces) if is_highlighted && add_spaces > 0
+          add_spaces = (@width - entry.x_offset - 5 - string.size)
+          @win.addstr(' ' * add_spaces) if add_spaces > 0
         end
-        @highlighted_y2 = line_number if is_highlighted
-        line_number
+        entry.y2 = line_number
       end
 
       def attrs(entry)
@@ -136,24 +146,26 @@ module GitCrecord
       end
 
       def highlight_next
-        to_highlight = @visibles[@visibles.index(@highlighted) + 1]
-        return if to_highlight.nil?
-        @highlighted = to_highlight
-        refresh
+        move_highlight(@visibles[@visibles.index(@highlighted) + 1])
       end
 
       def highlight_previous
-        to_highlight = @visibles[@visibles.index(@highlighted) - 1]
-        return if to_highlight.nil?
-        @highlighted = to_highlight
-        refresh
+        move_highlight(@visibles[[@visibles.index(@highlighted) - 1, 0].max])
+      end
+
+      def highlight_first
+        move_highlight(@visibles[0])
+      end
+
+      def highlight_last
+        move_highlight(@visibles[-1])
       end
 
       def collapse
         return if @highlighted.is_a?(Hunks::HunkLine)
         @highlighted.expanded = false
         update_visibles
-        refresh
+        redraw
       end
 
       def expand
@@ -161,36 +173,24 @@ module GitCrecord
         @highlighted.expanded = true
         update_visibles
         @highlighted = @visibles[@visibles.index(@highlighted) + 1]
-        refresh
+        redraw
       end
 
       def toggle_fold
         @highlighted.expanded = !@highlighted.expanded
         update_visibles
-        refresh
-      end
-
-      def highlight_first
-        return if @highlighted == @visibles[0]
-        @highlighted = @visibles[0]
-        refresh
-      end
-
-      def highlight_last
-        return if @highlighted == @visibles[-1]
-        @highlighted = @visibles[-1]
-        refresh
+        redraw
       end
 
       def toggle_selection
         @highlighted.selected = !@highlighted.selected
-        refresh
+        redraw
       end
 
       def toggle_all_selections
         new_selected = @files[0].selected == false
         @files.each{ |file| file.selected = new_selected }
-        refresh
+        redraw
       end
 
       def help_window
