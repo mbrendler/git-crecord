@@ -79,10 +79,9 @@ module GitCrecord
       end
 
       def print_entry(entry, line_number)
-        is_highlighted = entry == @highlighted
         entry.y1 = line_number + 1
         entry.strings(@width - entry.x_offset - 5).each_with_index do |string, index|
-          @win.attrset(entry.is_a?(Hunks::File) && is_highlighted ? attrs(entry) : 0)
+          @win.attrset(entry.is_a?(Hunks::File) ? attrs(entry) : 0)
           @win.setpos(line_number += 1, entry.x_offset)
           if index == 0 && entry.selectable
             @win.addstr("[#{SELECTED_MAP.fetch(entry.selected)}]  ")
