@@ -14,6 +14,8 @@ module GitCrecord
   f      - toggle fold
   g      - go to first line
   G      - go to last line
+  C-P    - up to previous hunk / file
+  C-N    - down to previous hunk / file
   SPACE  - toggle selection
   A      - toggle all selections
   ?      - this help window

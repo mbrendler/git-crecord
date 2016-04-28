@@ -19,6 +19,8 @@ module GitCrecord
       'f' => :toggle_fold,
       'g' => :highlight_first,
       'G' => :highlight_last,
+      ''.ord => :highlight_next_hunk,
+      ''.ord => :highlight_previous_hunk,
       ' ' => :toggle_selection,
       'A' => :toggle_all_selections,
       '?' => :help_window,

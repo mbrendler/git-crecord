@@ -147,6 +147,24 @@ module GitCrecord
         move_highlight(@visibles[-1])
       end
 
+      def highlight_next_hunk
+        index = @visibles.index(@highlighted)
+        move_highlight(
+          @visibles[(index + 1)..-1].find do |hunk|
+            hunk.is_a?(Hunks::File) || hunk.is_a?(Hunks::Hunk)
+          end
+        )
+      end
+
+      def highlight_previous_hunk
+        index = @visibles.index(@highlighted)
+        move_highlight(
+          @visibles[0...index].reverse_each.find do |hunk|
+            hunk.is_a?(Hunks::File) || hunk.is_a?(Hunks::Hunk)
+          end
+        )
+      end
+
       def collapse
         return if @highlighted.is_a?(Hunks::Line) || !@highlighted.expanded
         @highlighted.expanded = false
