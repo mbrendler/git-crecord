@@ -28,9 +28,9 @@ module GitCrecord
         "  #{subs.size} hunk(s), #{line_count} line(s) changed"
       end
 
-      def strings(width)
+      def strings(width, large: expanded)
         result = to_s.scan(/.{1,#{width}}/)
-        return result unless expanded
+        return result unless large
         result += info_string.scan(/.{1,#{width}}/)
         result << ''
       end

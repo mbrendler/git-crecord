@@ -11,7 +11,7 @@ module GitCrecord
         super()
       end
 
-      def strings(width)
+      def strings(width, **_)
         @head.scan(/.{1,#{width}}/)
       end
 
