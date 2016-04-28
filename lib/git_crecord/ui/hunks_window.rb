@@ -5,15 +5,7 @@ require_relative '../git'
 
 module GitCrecord
   module UI
-    class QuitAction
-      def initialize(&block)
-        @block = block
-      end
-
-      def call
-        @block.call
-      end
-
+    class QuitAction < Proc
       def ==(other)
         :quit == other
       end
