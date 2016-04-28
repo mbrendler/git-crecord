@@ -1,5 +1,5 @@
 require_relative 'hunk_base'
-require_relative 'hunk_line'
+require_relative 'line'
 
 module GitCrecord
   module Hunks
@@ -22,7 +22,7 @@ module GitCrecord
       end
 
       def <<(line)
-        @lines << HunkLine.new(line)
+        @lines << Line.new(line)
       end
 
       def subs

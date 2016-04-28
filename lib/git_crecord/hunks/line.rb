@@ -2,7 +2,7 @@ require_relative 'hunk_base'
 
 module GitCrecord
   module Hunks
-    class HunkLine < HunkBase
+    class Line < HunkBase
       attr_accessor :y1, :y2
       attr_accessor :selected
 

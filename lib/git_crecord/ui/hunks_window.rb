@@ -112,12 +112,12 @@ module GitCrecord
 
       def attrs(entry)
         color = Color.normal
-        if entry.is_a?(Hunks::HunkLine)
+        if entry.is_a?(Hunks::Line)
           color = Color.green if entry.add?
           color = Color.red if entry.del?
         end
         color = Color.hl if entry == @highlighted
-        color | (entry.is_a?(Hunks::HunkLine) ? 0 : Curses::A_BOLD)
+        color | (entry.is_a?(Hunks::Line) ? 0 : Curses::A_BOLD)
       end
 
       def update_visibles
@@ -162,14 +162,14 @@ module GitCrecord
       end
 
       def collapse
-        return if @highlighted.is_a?(Hunks::HunkLine)
+        return if @highlighted.is_a?(Hunks::Line)
         @highlighted.expanded = false
         update_visibles
         redraw
       end
 
       def expand
-        return if @highlighted.is_a?(Hunks::HunkLine)
+        return if @highlighted.is_a?(Hunks::Line)
         @highlighted.expanded = true
         update_visibles
         @highlighted = @visibles[@visibles.index(@highlighted) + 1]
