@@ -49,10 +49,8 @@ module GitCrecord
       end
 
       def parse_header
-        (
-          @head.match(/@@ -(\d+),(\d+) \+(\d+),(\d+) @@/) ||
-          @head.match(/@@ -(\d+),(\d+) \+(\d+) @@/).to_a + [1]
-        )[1..4].map(&:to_i)
+        match = @head.match(/@@ -(\d+)(,(\d+))? \+(\d+)(,(\d+))? @@/)
+        [match[1], match[3] || 1, match[4], match[6] || 1].map(&:to_i)
       end
     end
   end
