@@ -46,9 +46,13 @@ module GitCrecord
       def height(width, hunks = @files)
         hunks.reduce(0) do |h, entry|
           h + \
-            entry.strings(width - entry.x_offset - 5, large: true).size + \
+            entry.strings(content_width(entry, width), large: true).size + \
             height(width, entry.subs)
         end
+      end
+
+      def content_width(entry, width = @width)
+        width - entry.x_offset - 5
       end
 
       def scroll_position
@@ -80,7 +84,7 @@ module GitCrecord
 
       def print_entry(entry, line_number)
         entry.y1 = line_number + 1
-        entry.strings(@width - entry.x_offset - 5).each_with_index do |string, index|
+        entry.strings(content_width(entry)).each_with_index do |string, index|
           @win.attrset(entry.is_a?(Hunks::File) ? attrs(entry) : 0)
           @win.setpos(line_number += 1, entry.x_offset)
           if index == 0 && entry.selectable
@@ -90,7 +94,7 @@ module GitCrecord
           end
           @win.attrset(attrs(entry))
           @win.addstr(string)
-          add_spaces = (@width - entry.x_offset - 5 - string.size)
+          add_spaces = content_width(entry) - string.size
           @win.addstr(' ' * add_spaces) if add_spaces > 0
         end
         entry.y2 = line_number
