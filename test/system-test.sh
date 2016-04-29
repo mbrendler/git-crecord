@@ -21,7 +21,7 @@ EOF
   fi
 }
 
-function assert_diff(){
+function assert-diff(){
   local expected=$1
   assert-equal "$expected" "$(git diff | grep '^[+-][^+-]')"
 }
@@ -31,7 +31,7 @@ function assert-status() {
   assert-equal "$expected" "$(git status -s)"
 }
 
-function run_git_crecord(){
+function run-git-crecord(){
   local keys=$1
   "$EXECUTABLE" <<<"$keys"
 }
@@ -62,22 +62,22 @@ EOF
 
 
 echo "add all" # --------------------------------------------------------------
-run_git_crecord "s"
-assert_diff ""
+run-git-crecord "s"
+assert-diff ""
 
 git reset
 
 echo "add first line" # -------------------------------------------------------
-run_git_crecord " lj s"
-assert_diff "+This is the second line.
+run-git-crecord " lj s"
+assert-diff "+This is the second line.
 +This is line 3.
 +This is line 4."
 
 git reset
 
 echo "add another line" # -----------------------------------------------------
-run_git_crecord " ljjj s"
-assert_diff "+This is line 1.
+run-git-crecord " ljjj s"
+assert-diff "+This is line 1.
 +This is the second line.
 +This is line 4."
 
@@ -87,14 +87,14 @@ git ci -a -m "add some lines"
 sed -i '' '1,3d' a_file.txt
 
 echo "delete all lines" # -----------------------------------------------------
-run_git_crecord "s"
-assert_diff ""
+run-git-crecord "s"
+assert-diff ""
 
 git reset
 
 echo "delete one lines" # -----------------------------------------------------
-run_git_crecord " ljj s"
-assert_diff "-This is line 1.
+run-git-crecord " ljj s"
+assert-diff "-This is line 1.
 -This is line 3."
 
 git reset --hard
@@ -119,21 +119,21 @@ sed -i '' '12s/.*/This is the tenth line./' a_file.txt
 sed -i '' '13s/.*/This is the eleventh line./' a_file.txt
 
 echo "multiple hunks" # -------------------------------------------------------
-run_git_crecord "s"
-assert_diff ""
+run-git-crecord "s"
+assert-diff ""
 
 git reset
 
 echo "add lines of second hunk" #----------------------------------------------
-run_git_crecord " ljjj sq "
-assert_diff "-This is the second line.
+run-git-crecord " ljjj sq "
+assert-diff "-This is the second line.
 +This is line 2."
 
 git reset
 
 echo "add some lines of all hunks" #-------------------------------------------
-run_git_crecord " ljj jj jj j s"
-assert_diff "-This is the second line.
+run-git-crecord " ljj jj jj j s"
+assert-diff "-This is the second line.
 -This is line 11."
 
 git reset
@@ -141,17 +141,17 @@ git reset
 echo "run git-crecord in a subdirectory directory" # --------------------------
 mkdir -p "$REPO_DIR"/sub
 pushd "$REPO_DIR"/sub
-run_git_crecord "s"
-assert_diff ""
+run-git-crecord "s"
+assert-diff ""
 popd # "$REPO_DIR"/sub
 
 git reset
 
 echo "add a untracked file"
 echo "b_file line 1" > b_file.txt
-run_git_crecord 'AG s'
+run-git-crecord 'AG s'
 git commit -m "add b_file"
-assert_diff '-This is the second line.
+assert-diff '-This is the second line.
 +This is line 2.
 -This is line 10.
 -This is line 11.
@@ -160,13 +160,13 @@ assert_diff '-This is the second line.
 
 echo "a not selected file" # --------------------------------------------------
 echo "b_file line 2" >> b_file.txt
-run_git_crecord "j s"
-assert_diff "+b_file line 2"
+run-git-crecord "j s"
+assert-diff "+b_file line 2"
 
 echo "add untracked file from untracked directory" # --------------------------
 echo "a line" > "$REPO_DIR/sub/sub-file.txt"
-run_git_crecord "AG s"
-assert_diff "+b_file line 2"
+run-git-crecord "AG s"
+assert-diff "+b_file line 2"
 assert-status 'M  a_file.txt
  M b_file.txt
 A  sub/sub-file.txt'
