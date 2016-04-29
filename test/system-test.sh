@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-set -exuo pipefail
+set -euo pipefail
 
 function assert-equal() {
   local expected=$1
@@ -44,14 +44,14 @@ readonly REPO_DIR=$TEST_DIR/repo
 rm -rf "$TEST_DIR"
 mkdir -p "$TEST_DIR"
 
-git init "$REPO_DIR"
+git init "$REPO_DIR" > /dev/null
 
-pushd "$REPO_DIR"
+pushd "$REPO_DIR" > /dev/null
 
 touch a_file.txt
 
 git add a_file.txt
-git ci -m 'add a_file.txt'
+git ci -m 'add a_file.txt' > /dev/null
 
 cat > a_file.txt << 'EOF'
 This is line 1.
@@ -65,7 +65,7 @@ echo "add all -----------------------------------------------------------------"
 run-git-crecord "s"
 assert-diff ""
 
-git reset
+git reset > /dev/null
 
 echo "add first line ----------------------------------------------------------"
 run-git-crecord " lj s"
@@ -73,7 +73,7 @@ assert-diff "+This is the second line.
 +This is line 3.
 +This is line 4."
 
-git reset
+git reset > /dev/null
 
 echo "add another line --------------------------------------------------------"
 run-git-crecord " ljjj s"
@@ -82,7 +82,7 @@ assert-diff "+This is line 1.
 +This is line 4."
 
 
-git ci -a -m "add some lines"
+git ci -a -m "add some lines" > /dev/null
 
 sed -i '' '1,3d' a_file.txt
 
@@ -90,14 +90,14 @@ echo "delete all lines --------------------------------------------------------"
 run-git-crecord "s"
 assert-diff ""
 
-git reset
+git reset > /dev/null
 
 echo "delete one lines --------------------------------------------------------"
 run-git-crecord " ljj s"
 assert-diff "-This is line 1.
 -This is line 3."
 
-git reset --hard
+git reset --hard > /dev/null
 
 # add some more lines:
 cat >> a_file.txt << 'EOF'
@@ -112,7 +112,7 @@ This is line 10.
 This is line 11.
 This is line 12.
 EOF
-git ci -a -m "add some more lines"
+git ci -a -m "add some more lines" > /dev/null
 
 sed -i '' '2s/.*/This is line 2./' a_file.txt
 sed -i '' '12s/.*/This is the tenth line./' a_file.txt
@@ -122,35 +122,35 @@ echo "multiple hunks ----------------------------------------------------------"
 run-git-crecord "s"
 assert-diff ""
 
-git reset
+git reset > /dev/null
 
 echo "add lines of second hunk ------------------------------------------------"
 run-git-crecord " ljjj sq "
 assert-diff "-This is the second line.
 +This is line 2."
 
-git reset
+git reset > /dev/null
 
 echo "add some lines of all hunks ---------------------------------------------"
 run-git-crecord " ljj jj jj j s"
 assert-diff "-This is the second line.
 -This is line 11."
 
-git reset
+git reset > /dev/null
 
 echo "run git-crecord in a subdirectory directory -----------------------------"
 mkdir -p "$REPO_DIR"/sub
-pushd "$REPO_DIR"/sub
+pushd "$REPO_DIR"/sub > /dev/null
 run-git-crecord "s"
 assert-diff ""
-popd # "$REPO_DIR"/sub
+popd > /dev/null # "$REPO_DIR"/sub
 
-git reset
+git reset > /dev/null
 
 echo "add a untracked file ----------------------------------------------------"
 echo "b_file line 1" > b_file.txt
 run-git-crecord 'AG s'
-git commit -m "add b_file"
+git commit -m "add b_file" > /dev/null
 assert-diff '-This is the second line.
 +This is line 2.
 -This is line 10.
@@ -171,7 +171,7 @@ assert-status 'M  a_file.txt
  M b_file.txt
 A  sub/sub-file.txt'
 
-popd # $REPO_DIR
+popd > /dev/null # $REPO_DIR
 
 cat << 'EOF'
   ___  _  __
