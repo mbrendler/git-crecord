@@ -26,4 +26,5 @@ GemSpec = Gem::Specification.new do |spec|
   spec.has_rdoc = false
   spec.extra_rdoc_files = %w(README.md CHANGELOG.md)
   spec.add_runtime_dependency 'curses', '~> 1.0', '>= 1.0.2'
+  spec.add_development_dependency 'minitest', '~> 5.8', '>= 5.8.4'
 end
