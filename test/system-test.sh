@@ -2,10 +2,15 @@
 
 set -exuo pipefail
 
-function assert_diff(){
-  local expect=$1
-  if test ! "$expect" = "$(git diff | grep '^[+-][^+-]')" ; then
+function assert-equal() {
+  local expected=$1
+  local actual=$1
+  if test "$expected" != "$actual" ; then
     cat << 'EOF'
+expect:
+$expect
+but got:
+$actual
  ____             _
 |  _ \ __ _ _ __ (_) ___
 | |_) / _` | '_ \| |/ __|
@@ -16,23 +21,14 @@ EOF
   fi
 }
 
+function assert_diff(){
+  local expected=$1
+  assert-equal "$expected" "$(git diff | grep '^[+-][^+-]')"
+}
+
 function assert-status() {
-  local expect=$1
-  local actual;actual="$(git status -s)"
-  if test ! "$expect" = "$actual" ; then
-    echo "expect:"
-    echo "$expect"
-    echo "but got:"
-    echo "$actual"
-    cat << 'EOF'
- ____             _
-|  _ \ __ _ _ __ (_) ___
-| |_) / _` | '_ \| |/ __|
-|  __/ (_| | | | | | (__
-|_|   \__,_|_| |_|_|\___|
-EOF
-    exit 1
-  fi
+  local expected=$1
+  assert-equal "$expected" "$(git status -s)"
 }
 
 function run_git_crecord(){
