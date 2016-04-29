@@ -71,6 +71,15 @@ module GitCrecord
         refresh
       end
 
+      def addstr(str, y = nil, x = 0, attr: 0, fill: false)
+        @win.setpos(y, x) unless y.nil?
+        @win.attrset(attr)
+        @win.addstr(str)
+        fill_size = @win.maxx - @win.curx
+        return unless fill && fill_size > 0
+        @win.addstr((fill * fill_size)[0..fill_size])
+      end
+
       def print_list(list, line_number: -1)
         list.each do |entry|
           line_number = print_entry(entry, line_number)
@@ -82,18 +91,13 @@ module GitCrecord
 
       def print_entry(entry, line_number)
         entry.y1 = line_number + 1
+        prefix = "[#{SELECTED_MAP.fetch(entry.selected)}]  "
+        attr = attrs(entry)
+        prefix_attr = entry.is_a?(Hunks::File) ? attr : 0
         entry.strings(content_width(entry)).each_with_index do |string, index|
-          @win.attrset(entry.is_a?(Hunks::File) ? attrs(entry) : 0)
-          @win.setpos(line_number += 1, entry.x_offset)
-          if index == 0 && entry.selectable
-            @win.addstr("[#{SELECTED_MAP.fetch(entry.selected)}]  ")
-          else
-            @win.addstr('     ')
-          end
-          @win.attrset(attrs(entry))
-          @win.addstr(string)
-          add_spaces = content_width(entry) - string.size
-          @win.addstr(' ' * add_spaces) if add_spaces > 0
+          prefix = '     ' unless index == 0 && entry.selectable
+          addstr(prefix, line_number += 1, entry.x_offset, attr: prefix_attr)
+          addstr(string, attr: attr, fill: ' ')
         end
         entry.y2 = line_number
       end
