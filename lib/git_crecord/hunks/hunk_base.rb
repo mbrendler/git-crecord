@@ -3,6 +3,7 @@ module GitCrecord
     class HunkBase
       attr_reader :selectable
       attr_accessor :expanded
+      attr_accessor :y1, :y2
 
       def initialize(selectable = true)
         @selectable = selectable

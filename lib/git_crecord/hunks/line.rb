@@ -3,7 +3,6 @@ require_relative 'hunk_base'
 module GitCrecord
   module Hunks
     class Line < HunkBase
-      attr_accessor :y1, :y2
       attr_accessor :selected
 
       def initialize(line)

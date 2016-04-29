@@ -4,10 +4,8 @@ require_relative 'hunk'
 module GitCrecord
   module Hunks
     class File < HunkBase
-      attr_accessor :y1, :y2
       attr_reader :filename_a
       attr_reader :type
-      attr_reader :hunks
 
       def initialize(filename_a, filename_b, type: :modified)
         @filename_a = filename_a

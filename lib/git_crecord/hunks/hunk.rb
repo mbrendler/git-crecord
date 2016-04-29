@@ -4,8 +4,6 @@ require_relative 'line'
 module GitCrecord
   module Hunks
     class Hunk < HunkBase
-      attr_accessor :y1, :y2
-
       def initialize(head)
         @head = head
         @lines = []
