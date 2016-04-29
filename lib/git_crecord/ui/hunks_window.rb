@@ -42,7 +42,7 @@ module GitCrecord
       end
 
       def height(width, hunks = @files)
-        hunks.reduce(0) do |h, entry|
+        hunks.reduce(@files.size) do |h, entry|
           h + \
             entry.strings(content_width(entry, width), large: true).size + \
             height(width, entry.subs)
@@ -85,6 +85,7 @@ module GitCrecord
           line_number = print_entry(entry, line_number)
           next unless entry.expanded
           line_number = print_list(entry.subs, line_number: line_number)
+          addstr('', line_number += 1, fill: '_') if entry.is_a?(Hunks::File)
         end
         line_number
       end
