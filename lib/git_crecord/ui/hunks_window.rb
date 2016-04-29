@@ -173,14 +173,14 @@ module GitCrecord
       end
 
       def collapse
-        return if @highlighted.is_a?(Hunks::Line) || !@highlighted.expanded
+        return if @highlighted.subs.empty? || !@highlighted.expanded
         @highlighted.expanded = false
         update_visibles
         redraw
       end
 
       def expand
-        return if @highlighted.is_a?(Hunks::Line) || @highlighted.expanded
+        return if @highlighted.subs.empty? || @highlighted.expanded
         @highlighted.expanded = true
         update_visibles
         @highlighted = @visibles[@visibles.index(@highlighted) + 1]
