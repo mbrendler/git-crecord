@@ -16,6 +16,25 @@ EOF
   fi
 }
 
+function assert-status() {
+  local expect=$1
+  local actual;actual="$(git status -s)"
+  if test ! "$expect" = "$actual" ; then
+    echo "expect:"
+    echo "$expect"
+    echo "but got:"
+    echo "$actual"
+    cat << 'EOF'
+ ____             _
+|  _ \ __ _ _ __ (_) ___
+| |_) / _` | '_ \| |/ __|
+|  __/ (_| | | | | | (__
+|_|   \__,_|_| |_|_|\___|
+EOF
+    exit 1
+  fi
+}
+
 function run_git_crecord(){
   local keys=$1
   "$EXECUTABLE" <<<"$keys"
@@ -147,6 +166,14 @@ echo "a not selected file" # --------------------------------------------------
 echo "b_file line 2" >> b_file.txt
 run_git_crecord "j s"
 assert_diff "+b_file line 2"
+
+echo "add untracked file from untracked directory" # --------------------------
+echo "a line" > "$REPO_DIR/sub/sub-file.txt"
+run_git_crecord "AG s"
+assert_diff "+b_file line 2"
+assert-status 'M  a_file.txt
+ M b_file.txt
+A  sub/sub-file.txt'
 
 popd # $REPO_DIR
 
