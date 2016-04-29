@@ -24,12 +24,11 @@ module GitCrecord
       end
 
       def refresh
-        @win.refresh(scroll_position, 0, 0, 0, Curses.lines - 1, @width)
+        @win.refresh(scroll_position, 0, 0, 0, Curses.lines - 1, @win.maxx)
       end
 
       def redraw
         @win.clear
-        @win.resize(@height, @width)
         print_list(@files)
         refresh
       end
@@ -37,9 +36,8 @@ module GitCrecord
       def resize
         new_width = Curses.cols
         new_height = [Curses.lines, height(new_width)].max
-        return if @width == new_width && @height == new_height
-        @width = new_width
-        @height = new_height
+        return if @win.maxx == new_width && @win.maxy == new_height
+        @win.resize(new_height, new_width)
         redraw
       end
 
@@ -51,7 +49,7 @@ module GitCrecord
         end
       end
 
-      def content_width(entry, width = @width)
+      def content_width(entry, width = @win.maxx)
         width - entry.x_offset - 5
       end
 
@@ -59,7 +57,7 @@ module GitCrecord
         if @scroll_position + 3 > @highlighted.y1
           @scroll_position = @highlighted.y1 - 3
         elsif @scroll_position - 4 + Curses.lines <= @highlighted.y2
-          @scroll_position = [@highlighted.y2 + 4, @height].min - Curses.lines
+          @scroll_position = [@highlighted.y2 + 4, @win.maxy].min - Curses.lines
         end
         @scroll_position
       end
