@@ -8,7 +8,6 @@ module GitCrecord
         @head = head
         @lines = []
         @expanded = true
-        super()
       end
 
       def strings(width, **_)
@@ -28,7 +27,7 @@ module GitCrecord
       end
 
       def highlightable_subs
-        @highlightable_subs ||= @lines.select(&:highlightable?)
+        @highlightable_subs ||= @lines.select(&:selectable?)
       end
 
       def generate_diff

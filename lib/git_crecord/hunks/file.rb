@@ -13,7 +13,6 @@ module GitCrecord
         @type = type
         @hunks = []
         @expanded = false
-        super()
       end
 
       def to_s
@@ -47,10 +46,6 @@ module GitCrecord
       end
 
       def subs
-        @hunks
-      end
-
-      def highlightable_subs
         @hunks
       end
 

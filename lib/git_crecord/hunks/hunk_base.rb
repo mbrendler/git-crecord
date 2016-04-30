@@ -1,16 +1,11 @@
 module GitCrecord
   module Hunks
     class HunkBase
-      attr_reader :selectable
       attr_accessor :expanded
       attr_accessor :y1, :y2
 
-      def initialize(selectable = true)
-        @selectable = selectable
-      end
-
-      def subs
-        []
+      def selectable?
+        true
       end
 
       def highlightable_subs

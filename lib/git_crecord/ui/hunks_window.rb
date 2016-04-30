@@ -96,7 +96,7 @@ module GitCrecord
         attr = attrs(entry)
         prefix_attr = entry.is_a?(Hunks::File) ? attr : 0
         entry.strings(content_width(entry)).each_with_index do |string, index|
-          prefix = '     ' unless index == 0 && entry.selectable
+          prefix = '     ' unless index == 0 && entry.selectable?
           addstr(prefix, line_number += 1, entry.x_offset, attr: prefix_attr)
           addstr(string, attr: attr, fill: ' ')
         end

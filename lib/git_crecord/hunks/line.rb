@@ -8,7 +8,10 @@ module GitCrecord
       def initialize(line)
         @line = line
         @selected = true
-        super(add? || del?)
+      end
+
+      def subs
+        []
       end
 
       def strings(width, **_)
@@ -27,7 +30,7 @@ module GitCrecord
         @line.start_with?('-')
       end
 
-      def highlightable?
+      def selectable?
         add? || del?
       end
 
