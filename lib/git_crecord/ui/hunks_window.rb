@@ -54,9 +54,10 @@ module GitCrecord
       end
 
       def scroll_position
-        if @scroll_position + 3 > @highlighted.y1
-          @scroll_position = @highlighted.y1 - 3
-        elsif @scroll_position - 4 + Curses.lines <= @highlighted.y2
+        upper_position = @highlighted.y1 - 3
+        if @scroll_position > upper_position
+          @scroll_position = upper_position
+        elsif @scroll_position <= @highlighted.y2 + 4 - Curses.lines
           @scroll_position = [@highlighted.y2 + 4, @win.maxy].min - Curses.lines
         end
         @scroll_position
