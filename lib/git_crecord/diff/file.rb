@@ -1,9 +1,9 @@
-require_relative 'hunk_base'
+require_relative 'difference'
 require_relative 'hunk'
 
 module GitCrecord
-  module Hunks
-    class File < HunkBase
+  module Diff
+    class File < Difference
       attr_reader :filename_a
       attr_reader :type
 

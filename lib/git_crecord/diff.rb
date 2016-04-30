@@ -1,7 +1,7 @@
-require_relative 'hunks/file'
+require_relative 'diff/file'
 
 module GitCrecord
-  module Hunks
+  module Diff
     module_function
 
     def parse(diff)

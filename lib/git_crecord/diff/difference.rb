@@ -1,6 +1,6 @@
 module GitCrecord
-  module Hunks
-    class HunkBase
+  module Diff
+    class Difference
       attr_accessor :expanded
       attr_accessor :y1, :y2
 

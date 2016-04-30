@@ -1,5 +1,5 @@
 require_relative 'git_crecord/git'
-require_relative 'git_crecord/hunks'
+require_relative 'git_crecord/diff'
 require_relative 'git_crecord/ui'
 require_relative 'git_crecord/version'
 require_relative 'git_crecord/ui/help_window'
@@ -19,8 +19,8 @@ module GitCrecord
 
   def self.run
     Dir.chdir(Git.toplevel_dir) do
-      files = Hunks.parse(Git.diff)
-      files.concat(Hunks.untracked_files(Git.status))
+      files = Diff.parse(Git.diff)
+      files.concat(Diff.untracked_files(Git.status))
       return false if files.empty?
       result = UI.run(files)
       return result.call == true if result.respond_to?(:call)

@@ -1,8 +1,8 @@
-require_relative 'hunk_base'
+require_relative 'difference'
 
 module GitCrecord
-  module Hunks
-    class Line < HunkBase
+  module Diff
+    class Line < Difference
       attr_accessor :selected
 
       def initialize(line)

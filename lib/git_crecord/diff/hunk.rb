@@ -1,9 +1,9 @@
-require_relative 'hunk_base'
+require_relative 'difference'
 require_relative 'line'
 
 module GitCrecord
-  module Hunks
-    class Hunk < HunkBase
+  module Diff
+    class Hunk < Difference
       def initialize(head)
         @head = head
         @lines = []

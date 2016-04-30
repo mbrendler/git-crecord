@@ -41,8 +41,8 @@ module GitCrecord
         redraw
       end
 
-      def height(width, hunks = @files)
-        hunks.reduce(@files.size) do |h, entry|
+      def height(width, differences = @files)
+        differences.reduce(@files.size) do |h, entry|
           h + \
             entry.strings(content_width(entry, width), large: true).size + \
             height(width, entry.subs)
@@ -86,7 +86,7 @@ module GitCrecord
           line_number = print_entry(entry, line_number)
           next unless entry.expanded
           line_number = print_list(entry.subs, line_number: line_number)
-          addstr('', line_number += 1, fill: '_') if entry.is_a?(Hunks::File)
+          addstr('', line_number += 1, fill: '_') if entry.is_a?(Diff::File)
         end
         line_number
       end
@@ -95,7 +95,7 @@ module GitCrecord
         entry.y1 = line_number + 1
         prefix = "[#{SELECTED_MAP.fetch(entry.selected)}]  "
         attr = attrs(entry)
-        prefix_attr = entry.is_a?(Hunks::File) ? attr : 0
+        prefix_attr = entry.is_a?(Diff::File) ? attr : 0
         entry.strings(content_width(entry)).each_with_index do |string, index|
           prefix = '     ' unless index == 0 && entry.selectable?
           addstr(prefix, line_number += 1, entry.x_offset, attr: prefix_attr)
@@ -106,12 +106,12 @@ module GitCrecord
 
       def attrs(entry)
         color = Color.normal
-        if entry.is_a?(Hunks::Line)
+        if entry.is_a?(Diff::Line)
           color = Color.green if entry.add?
           color = Color.red if entry.del?
         end
         color = Color.hl if entry == @highlighted
-        color | (entry.is_a?(Hunks::Line) ? 0 : Curses::A_BOLD)
+        color | (entry.is_a?(Diff::Line) ? 0 : Curses::A_BOLD)
       end
 
       def update_visibles
