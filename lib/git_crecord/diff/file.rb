@@ -39,6 +39,7 @@ module GitCrecord
 
       def <<(hunk)
         @hunks << Hunk.new(hunk)
+        self
       end
 
       def add_hunk_line(line)

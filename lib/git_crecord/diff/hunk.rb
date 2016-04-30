@@ -20,6 +20,7 @@ module GitCrecord
 
       def <<(line)
         @lines << Line.new(line)
+        self
       end
 
       def subs
