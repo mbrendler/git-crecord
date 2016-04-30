@@ -22,7 +22,7 @@ module GitCrecord
       end
 
       def info_string
-        line_count = subs.reduce(0){ |a, e| e.highlightable_subs.size + a }
+        line_count = subs.reduce(0){ |a, e| e.selectable_subs.size + a }
         "  #{subs.size} hunk(s), #{line_count} line(s) changed"
       end
 

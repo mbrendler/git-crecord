@@ -8,18 +8,18 @@ module GitCrecord
         true
       end
 
-      def highlightable_subs
+      def selectable_subs
         subs
       end
 
       def selected
-        s = highlightable_subs.map(&:selected).uniq
+        s = selectable_subs.map(&:selected).uniq
         return s[0] if s.size == 1
         :partly
       end
 
       def selected=(value)
-        highlightable_subs.each{ |sub| sub.selected = value }
+        selectable_subs.each{ |sub| sub.selected = value }
       end
     end
   end

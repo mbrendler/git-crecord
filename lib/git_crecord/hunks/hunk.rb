@@ -26,8 +26,8 @@ module GitCrecord
         @lines
       end
 
-      def highlightable_subs
-        @highlightable_subs ||= @lines.select(&:selectable?)
+      def selectable_subs
+        @selectable_subs ||= @lines.select(&:selectable?)
       end
 
       def generate_diff
@@ -37,7 +37,7 @@ module GitCrecord
 
       def generate_header
         old_start, old_count, new_start, new_count = parse_header
-        highlightable_subs.each do |sub|
+        selectable_subs.each do |sub|
           next if sub.selected
           new_count -= 1 if sub.add?
           new_count += 1 if sub.del?

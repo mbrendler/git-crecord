@@ -117,9 +117,9 @@ module GitCrecord
         @visibles = @files.each_with_object([]) do |entry, vs|
           vs << entry
           next unless entry.expanded
-          entry.highlightable_subs.each do |entryy|
+          entry.selectable_subs.each do |entryy|
             vs << entryy
-            vs.concat(entryy.highlightable_subs) if entryy.expanded
+            vs.concat(entryy.selectable_subs) if entryy.expanded
           end
         end
       end
