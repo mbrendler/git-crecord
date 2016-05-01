@@ -3,7 +3,7 @@ require_relative 'difference'
 module GitCrecord
   module Diff
     class Line < Difference
-      attr_accessor :selected
+      attr_reader :selected
 
       def initialize(line)
         @line = line
@@ -29,6 +29,10 @@ module GitCrecord
 
       def selectable?
         add? || del?
+      end
+
+      def selected=(value)
+        @selected = selectable? ? value : selected
       end
 
       def expanded
