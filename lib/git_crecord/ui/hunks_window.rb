@@ -45,10 +45,6 @@ module GitCrecord
         @files.reduce(@files.size){ |a, e| a + e.max_height(width) }
       end
 
-      def content_width(entry, width = @win.maxx)
-        width - entry.x_offset - 5
-      end
-
       def scroll_position
         upper_position = @highlighted.y1 - 3
         if @scroll_position > upper_position
@@ -92,7 +88,7 @@ module GitCrecord
         prefix = "[#{SELECTED_MAP.fetch(entry.selected)}]  "
         attr = attrs(entry)
         prefix_attr = entry.is_a?(Diff::File) ? attr : 0
-        entry.strings(content_width(entry)).each_with_index do |string, index|
+        entry.strings(@win.maxx).each_with_index do |string, index|
           prefix = '     ' unless index == 0 && entry.selectable?
           addstr(prefix, line_number += 1, entry.x_offset, attr: prefix_attr)
           addstr(string, attr: attr, fill: ' ')

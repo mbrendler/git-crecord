@@ -29,12 +29,12 @@ module GitCrecord
       def strings(width)
         result = super
         return result unless expanded
-        result += info_string.scan(/.{1,#{width}}/)
+        result += info_string.scan(/.{1,#{content_width(width)}}/)
         result << ''
       end
 
       def max_height(width)
-        super + ((info_string.size - 1).abs / width) + 2
+        super + ((info_string.size - 1).abs / content_width(width)) + 2
       end
 
       def x_offset
