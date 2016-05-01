@@ -6,8 +6,8 @@ module GitCrecord
     class Hunk < Difference
       def initialize(head)
         @head = head
-        @lines = []
         @expanded = true
+        super()
       end
 
       def strings(width, **_)
@@ -19,16 +19,12 @@ module GitCrecord
       end
 
       def <<(line)
-        @lines << Line.new(line)
+        subs << Line.new(line)
         self
       end
 
-      def subs
-        @lines
-      end
-
       def selectable_subs
-        @selectable_subs ||= @lines.select(&:selectable?)
+        @selectable_subs ||= subs.select(&:selectable?)
       end
 
       def generate_diff

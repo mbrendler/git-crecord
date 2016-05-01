@@ -8,10 +8,7 @@ module GitCrecord
       def initialize(line)
         @line = line
         @selected = true
-      end
-
-      def subs
-        []
+        super()
       end
 
       def strings(width, **_)

@@ -11,8 +11,8 @@ module GitCrecord
         @filename_a = filename_a
         @filename_b = filename_b
         @type = type
-        @hunks = []
         @expanded = false
+        super()
       end
 
       def to_s
@@ -38,16 +38,12 @@ module GitCrecord
       end
 
       def <<(hunk)
-        @hunks << Hunk.new(hunk)
+        subs << Hunk.new(hunk)
         self
       end
 
       def add_hunk_line(line)
-        @hunks.last << line
-      end
-
-      def subs
-        @hunks
+        subs.last << line
       end
 
       def generate_diff

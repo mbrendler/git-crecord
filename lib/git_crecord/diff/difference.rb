@@ -3,6 +3,11 @@ module GitCrecord
     class Difference
       attr_accessor :expanded
       attr_accessor :y1, :y2
+      attr_reader :subs
+
+      def initialize
+        @subs = []
+      end
 
       def selectable?
         true
