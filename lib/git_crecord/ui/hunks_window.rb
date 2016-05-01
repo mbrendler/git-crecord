@@ -41,12 +41,8 @@ module GitCrecord
         redraw
       end
 
-      def content_height(width, differences = @files)
-        differences.reduce(@files.size) do |h, entry|
-          h + \
-            entry.strings(content_width(entry, width), large: true).size + \
-            content_height(width, entry.subs)
-        end
+      def content_height(width)
+        @files.reduce(@files.size){ |a, e| a + e.max_height(width) }
       end
 
       def content_width(entry, width = @win.maxx)

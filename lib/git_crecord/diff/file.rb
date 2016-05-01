@@ -26,11 +26,15 @@ module GitCrecord
         "  #{subs.size} hunk(s), #{line_count} line(s) changed"
       end
 
-      def strings(width, large: expanded)
+      def strings(width)
         result = super
-        return result unless large
+        return result unless expanded
         result += info_string.scan(/.{1,#{width}}/)
         result << ''
+      end
+
+      def max_height(width)
+        super + ((info_string.size - 1).abs / width) + 2
       end
 
       def x_offset

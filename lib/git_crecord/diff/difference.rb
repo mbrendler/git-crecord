@@ -9,8 +9,14 @@ module GitCrecord
         @subs = []
       end
 
-      def strings(width, **_)
+      def strings(width)
         to_s.scan(/.{1,#{width}}/)
+      end
+
+      def max_height(width)
+        ((to_s.size - 1).abs / width) + 1 + subs.reduce(0) do |a, e|
+          a + e.max_height(width)
+        end
       end
 
       def selectable?
