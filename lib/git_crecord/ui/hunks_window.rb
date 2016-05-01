@@ -7,8 +7,6 @@ require_relative '../quit_action'
 module GitCrecord
   module UI
     class HunksWindow
-      SELECTED_MAP = {true => 'X', false => ' ', :partly => '~'}.freeze
-
       def initialize(win, files)
         @win = win
         @files = files
@@ -23,8 +21,12 @@ module GitCrecord
         @win.getch
       end
 
+      def width
+        @win.maxx
+      end
+
       def refresh
-        @win.refresh(scroll_position, 0, 0, 0, Curses.lines - 1, @win.maxx)
+        @win.refresh(scroll_position, 0, 0, 0, Curses.lines - 1, width)
       end
 
       def redraw
@@ -36,7 +38,7 @@ module GitCrecord
       def resize
         new_width = Curses.cols
         new_height = [Curses.lines, content_height(new_width)].max
-        return if @win.maxx == new_width && @win.maxy == new_height
+        return if width == new_width && @win.maxy == new_height
         @win.resize(new_height, new_width)
         redraw
       end
@@ -59,8 +61,8 @@ module GitCrecord
         return if to == @highlighted || to.nil?
         from = @highlighted
         @highlighted = to
-        print_entry(from, from.y1 - 1)
-        print_entry(to, to.y1 - 1)
+        from.print(self, from.y1 - 1, false)
+        to.print(self, to.y1 - 1, true)
         refresh
       end
 
@@ -68,42 +70,19 @@ module GitCrecord
         @win.setpos(y, x) unless y.nil?
         @win.attrset(attr)
         @win.addstr(str)
-        fill_size = @win.maxx - @win.curx
+        fill_size = width - @win.curx
         return unless fill && fill_size > 0
         @win.addstr((fill * fill_size)[0..fill_size])
       end
 
-      def print_list(list, line_number: -1)
+      def print_list(list, line_number = -1)
         list.each do |entry|
-          line_number = print_entry(entry, line_number)
+          line_number = entry.print(self, line_number, entry == @highlighted)
           next unless entry.expanded
-          line_number = print_list(entry.subs, line_number: line_number)
+          line_number = print_list(entry.subs, line_number)
           addstr('', line_number += 1, fill: '_') if entry.is_a?(Diff::File)
         end
         line_number
-      end
-
-      def print_entry(entry, line_number)
-        entry.y1 = line_number + 1
-        prefix = "[#{SELECTED_MAP.fetch(entry.selected)}]  "
-        attr = attrs(entry)
-        prefix_attr = entry.is_a?(Diff::File) ? attr : 0
-        entry.strings(@win.maxx).each_with_index do |string, index|
-          prefix = '     ' unless index == 0 && entry.selectable?
-          addstr(prefix, line_number += 1, entry.x_offset, attr: prefix_attr)
-          addstr(string, attr: attr, fill: ' ')
-        end
-        entry.y2 = line_number
-      end
-
-      def attrs(entry)
-        color = Color.normal
-        if entry.is_a?(Diff::Line)
-          color = Color.green if entry.add?
-          color = Color.red if entry.del?
-        end
-        color = Color.hl if entry == @highlighted
-        color | (entry.is_a?(Diff::Line) ? 0 : Curses::A_BOLD)
       end
 
       def update_visibles

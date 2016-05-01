@@ -1,5 +1,6 @@
 require_relative 'difference'
 require_relative 'hunk'
+require_relative '../ui/color'
 
 module GitCrecord
   module Diff
@@ -60,6 +61,13 @@ module GitCrecord
           ''
         ].join("\n")
       end
+
+      def style(is_highlighted)
+        return Curses::A_BOLD | UI::Color.hl if is_highlighted
+        Curses::A_BOLD | UI::Color.normal
+      end
+
+      alias prefix_style style
     end
   end
 end

@@ -1,5 +1,6 @@
 require_relative 'difference'
 require_relative 'line'
+require_relative '../ui/color'
 
 module GitCrecord
   module Diff
@@ -42,6 +43,11 @@ module GitCrecord
         match = @head.match(/@@ -(\d+)(,(\d+))? \+(\d+)(,(\d+))? @@/)
         raise "mismatching hunk-header - '#{@head}'" if match.nil?
         [match[1], match[3] || 1, match[4], match[6] || 1].map(&:to_i)
+      end
+
+      def style(is_highlighted)
+        return Curses::A_BOLD | UI::Color.hl if is_highlighted
+        Curses::A_BOLD | UI::Color.normal
       end
     end
   end

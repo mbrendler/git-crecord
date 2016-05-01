@@ -1,4 +1,5 @@
 require_relative 'difference'
+require_relative '../ui/color'
 
 module GitCrecord
   module Diff
@@ -43,6 +44,13 @@ module GitCrecord
         return " #{@line[1..-1]}" if !selected && del?
         return @line if selected
         nil
+      end
+
+      def style(is_highlighted)
+        return UI::Color.hl if is_highlighted
+        return UI::Color.green if add?
+        return UI::Color.red if del?
+        UI::Color.normal
       end
     end
   end

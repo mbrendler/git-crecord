@@ -1,3 +1,5 @@
+require_relative '../ui/color'
+
 module GitCrecord
   module Diff
     class Difference
@@ -5,7 +7,12 @@ module GitCrecord
       attr_accessor :y1, :y2
       attr_reader :subs
 
-      SELECTION_MARKER_WIDTH = 5
+      SELECTED_MAP = {
+        true => '[X]  ',
+        false => '[ ]  ',
+        :partly => '[~]  '
+      }.freeze
+      SELECTION_MARKER_WIDTH = SELECTED_MAP[true].size
 
       def initialize
         @subs = []
@@ -42,6 +49,26 @@ module GitCrecord
 
       def selected=(value)
         selectable_subs.each{ |sub| sub.selected = value }
+      end
+
+      def style(_is_highlighted)
+        UI::Color.normal
+      end
+
+      def prefix_style(_is_highlighted)
+        UI::Color.normal
+      end
+
+      def print(win, line_number, is_highlighted)
+        @y1 = line_number + 1
+        prefix = SELECTED_MAP.fetch(selected)
+        strings(win.width).each_with_index do |string, index|
+          prefix = '     ' unless index == 0 && selectable?
+          p_style = prefix_style(is_highlighted)
+          win.addstr(prefix, line_number += 1, x_offset, attr: p_style)
+          win.addstr(string, attr: style(is_highlighted), fill: ' ')
+        end
+        @y2 = line_number
       end
     end
   end
