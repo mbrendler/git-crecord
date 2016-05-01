@@ -14,4 +14,9 @@ class HunkTest < Minitest::Test
     assert_equal([1, 1, 3, 4], Hunk.new('@@ -1 +3,4 @@').parse_header)
     assert_equal([1, 2, 3, 1], Hunk.new('@@ -1,2 +3 @@').parse_header)
   end
+
+  def test_parse_header_failure
+    hunk = Hunk.new('ugly header')
+    assert_raises(RuntimeError){ hunk.parse_header }
+  end
 end

@@ -40,6 +40,7 @@ module GitCrecord
 
       def parse_header
         match = @head.match(/@@ -(\d+)(,(\d+))? \+(\d+)(,(\d+))? @@/)
+        raise "mismatching hunk-header - '#{@head}'" if match.nil?
         [match[1], match[3] || 1, match[4], match[6] || 1].map(&:to_i)
       end
     end
