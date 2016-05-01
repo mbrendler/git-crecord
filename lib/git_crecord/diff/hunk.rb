@@ -23,10 +23,6 @@ module GitCrecord
         self
       end
 
-      def selectable_subs
-        @selectable_subs ||= subs.select(&:selectable?)
-      end
-
       def generate_diff
         return nil unless selected
         [generate_header, *subs.map(&:generate_diff).compact].join("\n")

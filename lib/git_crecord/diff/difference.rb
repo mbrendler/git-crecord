@@ -14,7 +14,7 @@ module GitCrecord
       end
 
       def selectable_subs
-        subs
+        @selectable_subs ||= subs.select(&:selectable?)
       end
 
       def selected
