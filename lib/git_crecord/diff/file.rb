@@ -27,7 +27,7 @@ module GitCrecord
       end
 
       def strings(width, large: expanded)
-        result = to_s.scan(/.{1,#{width}}/)
+        result = super
         return result unless large
         result += info_string.scan(/.{1,#{width}}/)
         result << ''

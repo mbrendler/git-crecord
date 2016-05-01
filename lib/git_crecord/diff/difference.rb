@@ -9,6 +9,10 @@ module GitCrecord
         @subs = []
       end
 
+      def strings(width, **_)
+        to_s.scan(/.{1,#{width}}/)
+      end
+
       def selectable?
         true
       end

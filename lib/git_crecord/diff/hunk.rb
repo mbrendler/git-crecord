@@ -10,8 +10,8 @@ module GitCrecord
         super()
       end
 
-      def strings(width, **_)
-        @head.scan(/.{1,#{width}}/)
+      def to_s
+        @head
       end
 
       def x_offset
