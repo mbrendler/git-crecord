@@ -13,14 +13,14 @@ module GitCrecord
       help
       true
     else
-      run
+      run(with_untracked_files: !argv.include?('--no-untracked-files'))
     end
   end
 
-  def self.run
+  def self.run(with_untracked_files: false)
     Dir.chdir(Git.toplevel_dir) do
       files = Diff.parse(Git.diff)
-      files.concat(Diff.untracked_files(Git.status))
+      files.concat(Diff.untracked_files(Git.status)) if with_untracked_files
       return false if files.empty?
       result = UI.run(files)
       return result.call == true if result.respond_to?(:call)
@@ -32,8 +32,9 @@ module GitCrecord
     puts <<EOS
 usage: git crecord [<options>]'
 
-  --version   - show version information'
-  -h          - this help message'
+  --no-untracked-files  -- ignore untracked files
+  --version             -- show version information'
+  -h                    -- this help message'
 
   in-program commands:'
 #{UI::HelpWindow::CONTENT.gsub(/^/, '  ')}
