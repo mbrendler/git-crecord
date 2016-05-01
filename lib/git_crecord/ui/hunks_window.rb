@@ -170,18 +170,11 @@ module GitCrecord
       end
 
       def collapse
-        return if @highlighted.subs.empty? || !@highlighted.expanded
-        @highlighted.expanded = false
-        update_visibles
-        redraw
+        toggle_fold if !@highlighted.subs.empty? && @highlighted.expanded
       end
 
       def expand
-        return if @highlighted.subs.empty? || @highlighted.expanded
-        @highlighted.expanded = true
-        update_visibles
-        @highlighted = @visibles[@visibles.index(@highlighted) + 1]
-        redraw
+        toggle_fold if !@highlighted.subs.empty? && !@highlighted.expanded
       end
 
       def toggle_fold
