@@ -35,17 +35,17 @@ module GitCrecord
 
       def resize
         new_width = Curses.cols
-        new_height = [Curses.lines, height(new_width)].max
+        new_height = [Curses.lines, content_height(new_width)].max
         return if @win.maxx == new_width && @win.maxy == new_height
         @win.resize(new_height, new_width)
         redraw
       end
 
-      def height(width, differences = @files)
+      def content_height(width, differences = @files)
         differences.reduce(@files.size) do |h, entry|
           h + \
             entry.strings(content_width(entry, width), large: true).size + \
-            height(width, entry.subs)
+            content_height(width, entry.subs)
         end
       end
 
