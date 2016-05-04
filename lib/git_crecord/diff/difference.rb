@@ -65,7 +65,8 @@ module GitCrecord
         strings(win.width).each_with_index do |string, index|
           prefix = '     ' unless index == 0 && selectable?
           p_style = prefix_style(is_highlighted)
-          win.addstr(prefix, line_number += 1, x_offset, attr: p_style)
+          win.addstr(' ' * x_offset, line_number += 1, attr: p_style)
+          win.addstr(prefix, attr: p_style)
           win.addstr(string, attr: style(is_highlighted), fill: ' ')
         end
         @y2 = line_number
