@@ -171,6 +171,11 @@ assert-status 'M  a_file.txt
  M b_file.txt
 A  sub/sub-file.txt'
 
+echo "test with +++ line ------------------------------------------------------"
+echo "++++" >> b_file.txt
+run-git-crecord "s"
+assert-diff ""
+
 popd > /dev/null # $REPO_DIR
 
 cat << 'EOF'
