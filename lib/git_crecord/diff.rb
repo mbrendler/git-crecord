@@ -6,13 +6,22 @@ module GitCrecord
 
     def parse(diff)
       files = []
-      diff.lines.each do |line|
+      enum = diff.lines.each
+      loop do
+        line = enum.next
         line.chomp!
-        next if line.start_with?(*%w(index --- +++))
-        next files << File.new(*parse_filenames(line)) if file_start?(line)
+        if file_start?(line)
+          files << File.new(*parse_filenames(line))
+          enum.next # index ...
+          enum.next # --- ...
+          enum.next # +++ ...
+          next
+        end
         next files[-1] << line if hunk_start?(line)
         files[-1].add_hunk_line(line)
       end
+      files
+    rescue StopIteration
       files
     end
 
