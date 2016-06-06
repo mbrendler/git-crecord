@@ -60,15 +60,19 @@ module GitCrecord
         UI::Color.normal
       end
 
+      def prefix(line_number)
+        return SELECTED_MAP.fetch(selected) if line_number == 0 && selectable?
+        ' ' * SELECTION_MARKER_WIDTH
+      end
+
       def print(win, line_number, is_highlighted)
         @y1 = line_number + 1
-        prefix = SELECTED_MAP.fetch(selected)
+        prefix_style = prefix_style(is_highlighted)
+        style = style(is_highlighted)
         strings(win.width).each_with_index do |string, index|
-          prefix = '     ' unless index == 0 && selectable?
-          p_style = prefix_style(is_highlighted)
-          win.addstr(' ' * x_offset, line_number += 1, attr: p_style)
-          win.addstr(prefix, attr: p_style)
-          win.addstr(string, attr: style(is_highlighted), fill: ' ')
+          win.addstr(' ' * x_offset, line_number += 1, attr: prefix_style)
+          win.addstr(prefix(index), attr: prefix_style)
+          win.addstr(string, attr: style, fill: ' ')
         end
         @y2 = line_number
       end
