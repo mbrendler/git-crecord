@@ -4,7 +4,7 @@ Inspred by [crecord mercurial extension](https://bitbucket.org/edgimar/crecord/w
 
 ![Screenshot](/screenshot.jpg?raw=true)
 
-## Install
+## Installation
 
  TODO
 
