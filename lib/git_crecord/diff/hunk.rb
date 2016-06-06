@@ -44,11 +44,6 @@ module GitCrecord
         raise "mismatching hunk-header - '#{@head}'" if match.nil?
         [match[1], match[3] || 1, match[4], match[6] || 1].map(&:to_i)
       end
-
-      def style(is_highlighted)
-        return Curses::A_BOLD | UI::Color.hl if is_highlighted
-        Curses::A_BOLD | UI::Color.normal
-      end
     end
   end
 end

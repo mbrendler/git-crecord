@@ -51,8 +51,9 @@ module GitCrecord
         selectable_subs.each{ |sub| sub.selected = value }
       end
 
-      def style(_is_highlighted)
-        UI::Color.normal
+      def style(is_highlighted)
+        return Curses::A_BOLD | UI::Color.hl if is_highlighted
+        Curses::A_BOLD | UI::Color.normal
       end
 
       def prefix_style(_is_highlighted)
