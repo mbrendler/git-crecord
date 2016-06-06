@@ -3,8 +3,6 @@ require 'curses'
 module GitCrecord
   module UI
     module Color
-      module_function
-
       MAP = {
         normal: 1,
         green: 2,
@@ -12,7 +10,7 @@ module GitCrecord
         hl: 4
       }.freeze
 
-      def init
+      def self.init
         Curses.start_color
         Curses.use_default_colors
         Curses.init_pair(MAP[:normal], -1, -1)
@@ -22,7 +20,7 @@ module GitCrecord
       end
 
       MAP.each_pair do |name, number|
-        define_method(name){ Curses.color_pair(number) }
+        define_singleton_method(name){ Curses.color_pair(number) }
       end
     end
   end
