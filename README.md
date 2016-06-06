@@ -2,6 +2,8 @@
 
 Inspred by [crecord mercurial extension](https://bitbucket.org/edgimar/crecord/wiki/Home), git-crecord is an easy way for partially committing/staging of git changes.
 
+![Screenshot](/screenshot.jpg?raw=true)
+
 ## Install
 
  TODO
