@@ -7,6 +7,10 @@ module GitCrecord
       selected_files = files.select(&:selected)
       add_files(selected_files.select{ |file| file.type == :untracked })
       diff = selected_files.map(&:generate_diff).join("\n")
+      _stage(diff).success?
+    end
+
+    def self._stage(diff)
       cmd = 'git apply --cached --unidiff-zero - '
       content, status = Open3.capture2e(cmd, stdin_data: diff)
       LOGGER.info(cmd)
@@ -15,7 +19,7 @@ module GitCrecord
       LOGGER.info('stdout/stderr:')
       LOGGER.info(content)
       LOGGER.info("return code: #{status}")
-      status.success?
+      status
     end
 
     def self.add_files(files)
