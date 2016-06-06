@@ -2,9 +2,7 @@ require_relative 'diff/file'
 
 module GitCrecord
   module Diff
-    module_function
-
-    def parse(diff)
+    def self.parse(diff)
       files = []
       enum = diff.lines.each
       loop do
@@ -17,33 +15,33 @@ module GitCrecord
       files
     end
 
-    def file_start?(line)
+    def self.file_start?(line)
       line.start_with?('diff')
     end
 
-    def hunk_start?(line)
+    def self.hunk_start?(line)
       line.start_with?('@@')
     end
 
-    def parse_file_header(line, enum)
+    def self.parse_file_header(line, enum)
       enum.next # index ...
       enum.next # --- ...
       enum.next # +++ ...
       File.new(*parse_filenames(line))
     end
 
-    def parse_filenames(line)
+    def self.parse_filenames(line)
       line.match(%r{a/(.*) b/(.*)$})[1..2]
     end
 
-    def untracked_files(git_status)
+    def self.untracked_files(git_status)
       git_status.lines.select{ |l| l.start_with?('??') }.flat_map do |path|
         path = path.chomp[3..-1]
         ::File.directory?(path) ? untracked_dir(path) : untracked_file(path)
       end.compact
     end
 
-    def untracked_file(filename)
+    def self.untracked_file(filename)
       File.new(filename, filename, type: :untracked).tap do |file|
         file_lines = ::File.readlines(filename)
         file << "@@ -0,0 +1,#{file_lines.size} @@"
@@ -52,7 +50,7 @@ module GitCrecord
       end
     end
 
-    def untracked_dir(path)
+    def self.untracked_dir(path)
       Dir.glob(::File.join(path, '**/*')).map do |filename|
         untracked_file(filename)
       end
