@@ -20,8 +20,8 @@ GemSpec = Gem::Specification.new do |spec|
     'allowed_push_host' => 'https://gems-eu.injixo.com'
   }
   spec.require_paths = %w(lib)
-  spec.files = %x(git ls-files).split($/).delete_if{ |f| %r{^(spec|test)/} =~ f }
-  spec.test_files = %x(git ls-files).split($/).grep(%r{^(spec|test)/})
+  spec.files = `git ls-files`.split($RS).delete_if{ |f| %r{^(spec|test)/} =~ f }
+  spec.test_files = `git ls-files`.split($RS).grep(%r{^(spec|test)/})
   spec.executables = %w(iwfm)
   spec.has_rdoc = false
   spec.extra_rdoc_files = %w(README.md CHANGELOG.md)
