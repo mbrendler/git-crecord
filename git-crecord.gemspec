@@ -22,7 +22,7 @@ GemSpec = Gem::Specification.new do |spec|
   spec.require_paths = %w(lib)
   spec.files = `git ls-files`.split($RS).delete_if{ |f| %r{^(spec|test)/} =~ f }
   spec.test_files = `git ls-files`.split($RS).grep(%r{^(spec|test)/})
-  spec.executables = %w(iwfm)
+  spec.executables = %w(git-crecord)
   spec.has_rdoc = false
   spec.extra_rdoc_files = %w(README.md CHANGELOG.md)
   spec.add_runtime_dependency 'curses', '~> 1.0', '>= 1.0.2'
