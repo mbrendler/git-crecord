@@ -105,9 +105,7 @@ module GitCrecord
       end
 
       def commit
-        QuitAction.new do
-          Git.commit if Git.stage(@files) == true
-        end
+        QuitAction.new{ Git.stage(@files) && Git.commit }
       end
 
       def highlight_next
