@@ -6,7 +6,9 @@ Inspred by [crecord mercurial extension](https://bitbucket.org/edgimar/crecord/w
 
 ## Installation
 
- TODO
+```shell
+$ gem install git-crecord
+```
 
 ## Usage
 
