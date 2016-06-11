@@ -16,8 +16,7 @@ GemSpec = Gem::Specification.new do |spec|
   spec.license = 'MIT'
   spec.homepage = 'https://github.com/mbrendler/git-crecord'
   spec.metadata = {
-    'issue_tracker' => 'https://github.com/mbrendler/git-crecord/issues',
-    'allowed_push_host' => 'https://gems-eu.injixo.com'
+    'issue_tracker' => 'https://github.com/mbrendler/git-crecord/issues'
   }
   spec.require_paths = %w(lib)
   spec.files = `git ls-files`.split($RS).delete_if{ |f| %r{^(spec|test)/} =~ f }
