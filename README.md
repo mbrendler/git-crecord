@@ -30,7 +30,7 @@ Key-bindings:
   C-N    - down to previous hunk / file
   SPACE  - toggle selection
   A      - toggle all selections
-  ?      - this help window
+  ?      - display help
   R      - force redraw
 ```
 
