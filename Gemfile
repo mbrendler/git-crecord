@@ -1,4 +1,6 @@
 source 'https://rubygems.org'
 gemspec
 
-gem 'curses', '~> 1.0'
+if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.1.0')
+  gem 'curses', '~> 1.0'
+end
