@@ -42,8 +42,9 @@ module GitCrecord
     end
 
     def self.untracked_file(filename)
+      file_lines = ::File.readlines(filename)
+      return nil if file_lines.empty?
       File.new(filename, filename, type: :untracked).tap do |file|
-        file_lines = ::File.readlines(filename)
         file << "@@ -0,0 +1,#{file_lines.size} @@"
         file_lines.each{ |line| file.add_hunk_line("+#{line.chomp}") }
         file.selected = false
