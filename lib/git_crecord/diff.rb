@@ -53,7 +53,7 @@ module GitCrecord
 
     def self.untracked_dir(path)
       Dir.glob(::File.join(path, '**/*')).map do |filename|
-        untracked_file(filename)
+        untracked_file(filename) unless ::File.directory?(filename)
       end
     end
   end

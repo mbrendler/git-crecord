@@ -139,7 +139,7 @@ assert-diff "-This is the second line.
 git reset > /dev/null
 
 echo "run git-crecord in a subdirectory directory -----------------------------"
-mkdir -p "$REPO_DIR"/sub
+mkdir -p "$REPO_DIR"/sub/sub2
 pushd "$REPO_DIR"/sub > /dev/null
 run-git-crecord "s"
 assert-diff ""
@@ -164,12 +164,12 @@ run-git-crecord "j s"
 assert-diff "+b_file line 2"
 
 echo "add untracked file from untracked directory -----------------------------"
-echo "a line" > "$REPO_DIR/sub/sub-file.txt"
+echo "a line" > "$REPO_DIR/sub/sub2/sub-file.txt"
 run-git-crecord "AG s"
 assert-diff "+b_file line 2"
 assert-status 'M  a_file.txt
  M b_file.txt
-A  sub/sub-file.txt'
+A  sub/sub2/sub-file.txt'
 
 echo "test with +++ line ------------------------------------------------------"
 echo "++++" >> b_file.txt
