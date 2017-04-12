@@ -9,19 +9,19 @@ GemSpec = Gem::Specification.new do |spec|
   spec.authors = 'Maik Brendler'
   spec.email = 'maik.brendler@invision.de'
   spec.summary = 'Git command to stage/commit hunks the simple way.'
-  spec.description = %w(
+  spec.description = %w[
     This gem adds the git-crecord command.
     It provides a curses UI to stage/commit git-hunks.
-  ).join(' ')
+  ].join(' ')
   spec.license = 'MIT'
   spec.homepage = 'https://github.com/mbrendler/git-crecord'
   spec.metadata = {
     'issue_tracker' => 'https://github.com/mbrendler/git-crecord/issues'
   }
-  spec.require_paths = %w(lib)
+  spec.require_paths = %w[lib]
   spec.files = `git ls-files`.split($RS).delete_if{ |f| %r{^(spec|test)/} =~ f }
   spec.test_files = `git ls-files`.split($RS).grep(%r{^(spec|test)/})
-  spec.executables = %w(git-crecord)
+  spec.executables = %w[git-crecord]
   spec.has_rdoc = false
   # Install curses dependency, via a native extension hack, because
   # ruby 2.0 includes curses and can't install curses-gem

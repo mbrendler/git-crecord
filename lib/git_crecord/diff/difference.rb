@@ -61,7 +61,7 @@ module GitCrecord
       end
 
       def prefix(line_number)
-        return SELECTED_MAP.fetch(selected) if line_number == 0 && selectable?
+        return SELECTED_MAP.fetch(selected) if line_number.zero? && selectable?
         ' ' * SELECTION_MARKER_WIDTH
       end
 

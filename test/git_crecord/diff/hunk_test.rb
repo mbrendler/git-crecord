@@ -5,7 +5,7 @@ class HunkTest < Minitest::Test
 
   def test_strings
     hunk = Hunk.new('1234567890' * 5)
-    expected = %w(12345678901 23456789012 34567890123 45678901234 567890)
+    expected = %w[12345678901 23456789012 34567890123 45678901234 567890]
     assert_equal(expected, hunk.strings(19))
   end
 
