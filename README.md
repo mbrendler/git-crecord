@@ -24,12 +24,12 @@ Key-bindings:
   j / ↓  - down
   k / ↑  - up
   h / ←  - collapse hunk
-  l / →  - expand
+  l / →  - expand hunk
   f      - toggle fold
   g      - go to first line
   G      - go to last line
   C-P    - up to previous hunk / file
-  C-N    - down to previous hunk / file
+  C-N    - down to next hunk / file
   SPACE  - toggle selection
   A      - toggle all selections
   ?      - display help
