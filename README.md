@@ -36,6 +36,13 @@ Key-bindings:
   R      - force redraw
 ```
 
+## Configuration
+
+```shell
+# configure tab-width to four spaces, default is two spaces:
+$ git config --global crecord.tabwidth 4
+```
+
 ## Development
 
 ```shell
