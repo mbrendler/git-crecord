@@ -32,13 +32,13 @@ module GitCrecord
 
   def self.help
     puts <<EOS
-usage: git crecord [<options>]'
+usage: git crecord [<options>]
 
   --no-untracked-files  -- ignore untracked files
-  --version             -- show version information'
-  -h                    -- this help message'
+  --version             -- show version information
+  -h                    -- this help message
 
-  in-program commands:'
+  in-program commands:
 #{UI::HelpWindow::CONTENT.gsub(/^/, '  ')}
 EOS
   end
