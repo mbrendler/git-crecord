@@ -23,8 +23,8 @@ Key-bindings:
   c      - commit selection and quit
   j / ↓  - down
   k / ↑  - up
-  h / ←  - collapse hunk
-  l / →  - expand hunk
+  h / ←  - collapse fold
+  l / →  - expand fold
   f      - toggle fold
   g      - go to first line
   G      - go to last line
