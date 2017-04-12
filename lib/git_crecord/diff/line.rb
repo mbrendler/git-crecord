@@ -13,7 +13,7 @@ module GitCrecord
       end
 
       def to_s
-        @to_s ||= @line.include?("\t") ? @line.gsub(/\t/, '  ') : @line
+        @to_s ||= @line.include?("\t") ? @line.gsub(/\t/, Git.tab) : @line
       end
 
       def x_offset

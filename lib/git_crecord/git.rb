@@ -48,5 +48,9 @@ module GitCrecord
     def self.toplevel_dir
       `git rev-parse --show-toplevel`.chomp
     end
+
+    def self.tab
+      @tab ||= ' ' * [2, `git config crecord.tabwidth`.to_i].max
+    end
   end
 end
