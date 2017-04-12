@@ -34,7 +34,8 @@ module GitCrecord
       Curses.clear
       Curses.noecho
       Curses.curs_set(0)
-      run_loop(HunksWindow.new(Curses::Pad.new(1, 1), files))
+      pad = Curses::Pad.new(1, 1).tap{ |p| p.keypad = true }
+      run_loop(HunksWindow.new(pad, files))
     ensure
       Curses.close_screen
     end
