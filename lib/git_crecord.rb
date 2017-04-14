@@ -1,8 +1,8 @@
-require_relative 'git_crecord/git'
 require_relative 'git_crecord/diff'
+require_relative 'git_crecord/git'
 require_relative 'git_crecord/ui'
-require_relative 'git_crecord/version'
 require_relative 'git_crecord/ui/help_window'
+require_relative 'git_crecord/version'
 
 module GitCrecord
   def self.main(argv)
