@@ -2,7 +2,7 @@
 module GitCrecord
   class QuitAction < Proc
     def ==(other)
-      :quit == other
+      other == :quit
     end
   end
 end
