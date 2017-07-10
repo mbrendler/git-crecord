@@ -3,6 +3,40 @@ require_relative '../ui/color'
 
 module GitCrecord
   module Diff
+    class PseudoLine < Difference
+      attr_accessor :selected
+
+      def initialize(line)
+        @line = line || 'file is empty'
+        @selected = false
+        super()
+      end
+
+      def to_s
+        @line
+      end
+
+      def x_offset
+        6
+      end
+
+      def selectable?
+        true
+      end
+
+      def expanded
+        false
+      end
+
+      def generate_diff
+        nil
+      end
+
+      def style(is_highlighted)
+        Curses::A_BOLD | (is_highlighted ? UI::Color.hl : UI::Color.normal)
+      end
+    end
+
     class Line < Difference
       attr_reader :selected
 
@@ -13,7 +47,7 @@ module GitCrecord
       end
 
       def to_s
-        @to_s ||= @line.include?("\t") ? @line.gsub(/\t/, Git.tab) : @line
+        @to_s ||= @line.gsub(/\t/, Git.tab)
       end
 
       def x_offset

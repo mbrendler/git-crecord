@@ -42,11 +42,11 @@ module GitCrecord
     end
 
     def self.untracked_file(filename)
-      file_lines = ::File.readlines(filename)
-      return nil if file_lines.empty?
       File.new(filename, filename, type: :untracked).tap do |file|
-        file << "@@ -0,0 +1,#{file_lines.size} @@"
-        file_lines.each{ |line| file.add_hunk_line("+#{line.chomp}") }
+        lines, err = file_lines(filename)
+        file << "@@ -0,0 +1,#{lines.size} @@"
+        file.subs[0].subs << PseudoLine.new(err) if lines.empty?
+        lines.each{ |line| file.add_hunk_line("+#{line.chomp}") }
         file.selected = false
       end
     end
@@ -55,6 +55,16 @@ module GitCrecord
       Dir.glob(::File.join(path, '**/*')).map do |filename|
         untracked_file(filename) unless ::File.directory?(filename)
       end
+    end
+
+    def self.file_encoding(filename)
+      `file --mime-encoding #{filename}`.split(': ', 2)[1].delete("\n")
+    end
+
+    def self.file_lines(filename)
+      encoding = file_encoding(filename)
+      return [[], 'binary'] if encoding == 'binary'
+      [::File.open(filename, "r:#{encoding}", &:readlines), nil]
     end
   end
 end
