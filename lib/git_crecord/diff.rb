@@ -58,7 +58,7 @@ module GitCrecord
     end
 
     def self.file_encoding(filename)
-      `file --mime-encoding #{filename}`.split(': ', 2)[1].delete("\n")
+      `file --mime-encoding #{filename}`.split(': ', 2)[1].chomp
     end
 
     def self.file_lines(filename)
