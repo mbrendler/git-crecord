@@ -33,7 +33,7 @@ function assert-status() {
 
 function run-git-crecord(){
   local keys=$1
-  "$EXECUTABLE" <<<"$keys"
+  "$EXECUTABLE" -u <<<"$keys"
 }
 
 readonly HERE="$(dirname "$(readlink -m "${BASH_SOURCE[0]}")")"

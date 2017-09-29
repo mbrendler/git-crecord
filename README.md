@@ -14,6 +14,7 @@ $ gem install git-crecord
 
 ```shell
 $ git crecord
+$ git crecord --untracked-files  # show untracked files
 ```
 
 Key-bindings:
