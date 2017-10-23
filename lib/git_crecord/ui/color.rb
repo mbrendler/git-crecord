@@ -16,7 +16,7 @@ module GitCrecord
         Curses.init_pair(MAP[:normal], -1, -1)
         Curses.init_pair(MAP[:green], Curses::COLOR_GREEN, -1)
         Curses.init_pair(MAP[:red], Curses::COLOR_RED, -1)
-        Curses.init_pair(MAP[:hl], Curses::COLOR_WHITE, Curses::COLOR_GREEN)
+        Curses.init_pair(MAP[:hl], Curses::COLOR_BLACK, Curses::COLOR_GREEN)
       end
 
       MAP.each_pair do |name, number|
