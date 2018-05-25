@@ -33,4 +33,5 @@ GemSpec = Gem::Specification.new do |spec|
   spec.extensions << 'ext/mkrf_conf.rb'
   spec.add_development_dependency 'minitest', '~> 5.8', '>= 5.8.4'
   spec.add_development_dependency 'rake', '~> 10.1', '>= 10.1.1'
+  spec.add_development_dependency 'rubocop', '>= 0.56.0'
 end

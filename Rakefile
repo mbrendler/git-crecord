@@ -13,4 +13,9 @@ task :systemtest do
   sh(File.join(__dir__, 'test/system-test.sh'))
 end
 
-task default: %i[test systemtest]
+desc 'run rubocop'
+task :rubocop do
+  sh('rubocop')
+end
+
+task default: %i[test systemtest rubocop]
