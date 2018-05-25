@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'git_crecord/diff'
 require_relative 'git_crecord/git'
 require_relative 'git_crecord/ui'
@@ -35,15 +37,15 @@ module GitCrecord
   end
 
   def self.help
-    puts <<EOS
-usage: git crecord [<options>]
+    puts <<~HELP
+      usage: git crecord [<options>]
 
-  -u, --untracked-files  -- show untracked files
-  --version              -- show version information
-  -h                     -- this help message
+        -u, --untracked-files  -- show untracked files
+        --version              -- show version information
+        -h                     -- this help message
 
-  in-program commands:
-#{UI::HelpWindow::CONTENT.gsub(/^/, '  ')}
-EOS
+        in-program commands:
+      #{UI::HelpWindow::CONTENT.gsub(/^/, '  ')}
+    HELP
   end
 end

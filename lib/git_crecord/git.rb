@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'logger'
 require 'open3'
 
@@ -5,7 +7,7 @@ module GitCrecord
   module Git
     def self.stage(files)
       selected_files = files.select(&:selected)
-      add_files(selected_files.select{ |file| file.type == :untracked })
+      add_files(selected_files.select { |file| file.type == :untracked })
       diff = selected_files.map(&:generate_diff).join("\n")
       _stage(diff).success?
     end

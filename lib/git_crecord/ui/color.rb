@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'curses'
 
 module GitCrecord
@@ -20,7 +22,7 @@ module GitCrecord
       end
 
       MAP.each_pair do |name, number|
-        define_singleton_method(name){ Curses.color_pair(number) }
+        define_singleton_method(name) { Curses.color_pair(number) }
       end
     end
   end

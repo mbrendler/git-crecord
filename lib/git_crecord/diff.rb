@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'diff/file'
 
 module GitCrecord
@@ -35,7 +37,7 @@ module GitCrecord
     end
 
     def self.untracked_files(git_status)
-      git_status.lines.select{ |l| l.start_with?('??') }.flat_map do |path|
+      git_status.lines.select { |l| l.start_with?('??') }.flat_map do |path|
         path = path.chomp[3..-1]
         ::File.directory?(path) ? untracked_dir(path) : untracked_file(path)
       end.compact
@@ -46,7 +48,7 @@ module GitCrecord
         lines, err = file_lines(filename)
         file << "@@ -0,0 +1,#{lines.size} @@"
         file.subs[0].subs << PseudoLine.new(err) if lines.empty?
-        lines.each{ |line| file.add_hunk_line("+#{line.chomp}") }
+        lines.each { |line| file.add_hunk_line("+#{line.chomp}") }
         file.selected = false
       end
     end

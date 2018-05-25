@@ -1,9 +1,11 @@
+# frozen_string_literal: true
+
 require 'curses'
 
 module GitCrecord
   module UI
     module HelpWindow
-      CONTENT = <<EOS.freeze
+      CONTENT = <<HELP
   q      - quit
   s      - stage selection and quit
   c      - commit selection and quit
@@ -20,7 +22,7 @@ module GitCrecord
   A      - toggle all selections
   ?      - display help
   R      - force redraw
-EOS
+HELP
 
       def self.show
         win = Curses::Window.new(height, width, 0, 0)

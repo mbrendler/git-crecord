@@ -1,9 +1,10 @@
+# frozen_string_literal: true
+
 require_relative 'lib/git_crecord/version'
 
 GemSpec = Gem::Specification.new do |spec|
   spec.required_rubygems_version = Gem::Requirement.new('>= 1.3.6')
   spec.platform = Gem::Platform::RUBY
-  spec.required_ruby_version = '>= 2.0.0'
   spec.required_ruby_version = '>= 2.3.0'
   spec.name = 'git-crecord'
   spec.version = GitCrecord::VERSION
@@ -20,7 +21,9 @@ GemSpec = Gem::Specification.new do |spec|
     'issue_tracker' => 'https://github.com/mbrendler/git-crecord/issues'
   }
   spec.require_paths = %w[lib]
-  spec.files = `git ls-files`.split($RS).delete_if{ |f| %r{^(spec|test)/} =~ f }
+  spec.files = `git ls-files`.split($RS).delete_if do |f|
+    %r{^(spec|test)/} =~ f
+  end
   spec.test_files = `git ls-files`.split($RS).grep(%r{^(spec|test)/})
   spec.executables = %w[git-crecord]
   spec.has_rdoc = false
@@ -28,6 +31,6 @@ GemSpec = Gem::Specification.new do |spec|
   # ruby 2.0 includes curses and can't install curses-gem
   # spec.add_dependency 'curses', '~> 1.0'
   spec.extensions << 'ext/mkrf_conf.rb'
-  spec.add_development_dependency 'rake', '~> 10.1', '>= 10.1.1'
   spec.add_development_dependency 'minitest', '~> 5.8', '>= 5.8.4'
+  spec.add_development_dependency 'rake', '~> 10.1', '>= 10.1.1'
 end

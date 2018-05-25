@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rubygems'
 require 'rubygems/dependency_installer'
 
@@ -11,5 +13,5 @@ if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.1.0')
 end
 
 File.open(File.join(__dir__, 'Rakefile'), 'w') do |f|
-  f.write("task :default#{$/}")
+  f.write("task :default#{$RS}")
 end

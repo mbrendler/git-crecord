@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'curses'
 require_relative 'ui/color'
 require_relative 'ui/hunks_window'
@@ -34,7 +36,7 @@ module GitCrecord
       Curses.clear
       Curses.noecho
       Curses.curs_set(0)
-      pad = Curses::Pad.new(1, 1).tap{ |p| p.keypad = true }
+      pad = Curses::Pad.new(1, 1).tap { |p| p.keypad = true }
       run_loop(HunksWindow.new(pad, files))
     ensure
       Curses.close_screen

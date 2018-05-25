@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative '../../test_helper'
 
 class HunkTest < Minitest::Test
@@ -23,6 +25,6 @@ class HunkTest < Minitest::Test
 
   def test_parse_header_failure
     hunk = Hunk.new('ugly header')
-    assert_raises(RuntimeError){ hunk.parse_header }
+    assert_raises(RuntimeError) { hunk.parse_header }
   end
 end

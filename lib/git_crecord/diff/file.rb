@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'difference'
 require_relative 'hunk'
 require_relative '../ui/color'
@@ -17,13 +19,13 @@ module GitCrecord
       end
 
       def to_s
-        prefix = {modified: 'M', untracked: '?'}.fetch(type)
+        prefix = { modified: 'M', untracked: '?' }.fetch(type)
         return "#{prefix} #{@filename_a}" if @filename_a == @filename_b
         "#{prefix} #{filename_a} -> #{filename_b}"
       end
 
       def info_string
-        line_count = subs.reduce(0){ |a, e| e.selectable_subs.size + a }
+        line_count = subs.reduce(0) { |a, e| e.selectable_subs.size + a }
         "  #{subs.size} hunk(s), #{line_count} line(s) changed"
       end
 

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'curses'
 require_relative 'color'
 require_relative 'help_window'
@@ -44,7 +46,7 @@ module GitCrecord
       end
 
       def content_height(width)
-        @files.reduce(@files.size){ |a, e| a + e.max_height(width) }
+        @files.reduce(@files.size) { |a, e| a + e.max_height(width) }
       end
 
       def scroll_position
@@ -66,12 +68,12 @@ module GitCrecord
         refresh
       end
 
-      def addstr(str, y = nil, x = 0, attr: 0, fill: false)
-        @win.setpos(y, x) unless y.nil?
+      def addstr(str, y_pos = nil, x_pos = 0, attr: 0, fill: false)
+        @win.setpos(y_pos, x_pos) unless y_pos.nil?
         @win.attrset(attr)
         @win.addstr(str)
         fill_size = width - @win.curx
-        return unless fill && fill_size > 0
+        return unless fill && fill_size.positive?
         @win.addstr((fill * fill_size)[0..fill_size])
       end
 
@@ -101,11 +103,11 @@ module GitCrecord
       end
 
       def stage
-        QuitAction.new{ Git.stage(@files) }
+        QuitAction.new { Git.stage(@files) }
       end
 
       def commit
-        QuitAction.new{ Git.stage(@files) && Git.commit }
+        QuitAction.new { Git.stage(@files) && Git.commit }
       end
 
       def highlight_next
@@ -127,14 +129,14 @@ module GitCrecord
       def highlight_next_hunk
         index = @visibles.index(@highlighted)
         move_highlight(
-          @visibles[(index + 1)..-1].find{ |entry| !entry.subs.empty? }
+          @visibles[(index + 1)..-1].find { |entry| !entry.subs.empty? }
         )
       end
 
       def highlight_previous_hunk
         index = @visibles.index(@highlighted)
         move_highlight(
-          @visibles[0...index].reverse_each.find{ |entry| !entry.subs.empty? }
+          @visibles[0...index].reverse_each.find { |entry| !entry.subs.empty? }
         )
       end
 
@@ -159,7 +161,7 @@ module GitCrecord
 
       def toggle_all_selections
         new_selected = @files[0].selected == false
-        @files.each{ |file| file.selected = new_selected }
+        @files.each { |file| file.selected = new_selected }
         redraw
       end
 

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative '../ui/color'
 
 module GitCrecord
@@ -48,7 +50,7 @@ module GitCrecord
       end
 
       def selected=(value)
-        selectable_subs.each{ |sub| sub.selected = value }
+        selectable_subs.each { |sub| sub.selected = value }
       end
 
       def style(is_highlighted)
