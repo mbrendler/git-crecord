@@ -14,9 +14,18 @@ module GitCrecord
         false => '[ ]  ',
         :partly => '[~]  '
       }.freeze
+
+      REVERSE_SELECTED_MAP = {
+        true => '[R]  ',
+        false => '[X]  ',
+        :partly => '[~]  '
+      }.freeze
+
       SELECTION_MARKER_WIDTH = SELECTED_MAP[true].size
 
-      def initialize
+      def initialize(reverse: false)
+        @reverse = reverse
+        @selection_marker_map = reverse ? REVERSE_SELECTED_MAP : SELECTED_MAP
         @subs = []
       end
 
@@ -63,7 +72,8 @@ module GitCrecord
       end
 
       def prefix(line_number)
-        return SELECTED_MAP.fetch(selected) if line_number.zero? && selectable?
+        show_selection_marker = line_number.zero? && selectable?
+        return @selection_marker_map.fetch(selected) if show_selection_marker
         ' ' * SELECTION_MARKER_WIDTH
       end
 

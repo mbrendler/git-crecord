@@ -42,10 +42,10 @@ module GitCrecord
     class Line < Difference
       attr_reader :selected
 
-      def initialize(line)
+      def initialize(line, reverse: false)
         @line = line
         @selected = true
-        super()
+        super(reverse: reverse)
       end
 
       def to_s

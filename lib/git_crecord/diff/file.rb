@@ -10,12 +10,12 @@ module GitCrecord
       attr_reader :filename_a
       attr_reader :type
 
-      def initialize(filename_a, filename_b, type: :modified)
+      def initialize(filename_a, filename_b, type: :modified, reverse: false)
         @filename_a = filename_a
         @filename_b = filename_b
         @type = type
         @expanded = false
-        super()
+        super(reverse: reverse)
       end
 
       def to_s
@@ -45,7 +45,7 @@ module GitCrecord
       end
 
       def <<(hunk)
-        subs << Hunk.new(hunk)
+        subs << Hunk.new(hunk, reverse: @reverse)
         self
       end
 

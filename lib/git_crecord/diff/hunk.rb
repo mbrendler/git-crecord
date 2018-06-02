@@ -7,10 +7,10 @@ require_relative '../ui/color'
 module GitCrecord
   module Diff
     class Hunk < Difference
-      def initialize(head)
+      def initialize(head, reverse: false)
         @head = head
         @expanded = true
-        super()
+        super(reverse: reverse)
       end
 
       def to_s
@@ -22,7 +22,7 @@ module GitCrecord
       end
 
       def <<(line)
-        subs << Line.new(line)
+        subs << Line.new(line, reverse: @reverse)
         self
       end
 

@@ -33,9 +33,14 @@ function assert-status() {
   assert-equal "$expected" "$(git status -s)"
 }
 
-function run-git-crecord(){
+function run-git-crecord() {
   local keys=$1
-  "$EXECUTABLE" -u <<<"$keys"
+  "$EXECUTABLE" -u "$@" <<<"$keys"
+}
+
+function run-git-crecord-reverse() {
+  local keys=$1
+  "$EXECUTABLE" -R <<<"$keys"
 }
 
 readonly HERE="$(dirname "$(readlink -m "${BASH_SOURCE[0]}")")"
@@ -70,7 +75,7 @@ assert-diff ""
 git reset > /dev/null
 
 echo "add first line ----------------------------------------------------------"
-run-git-crecord " lj s"
+run-git-crecord " ljj s"
 assert-diff "+This is the second line.
 +This is line 3.
 +This is line 4."
@@ -78,7 +83,7 @@ assert-diff "+This is the second line.
 git reset > /dev/null
 
 echo "add another line --------------------------------------------------------"
-run-git-crecord " ljjj s"
+run-git-crecord " ljjjj s"
 assert-diff "+This is line 1.
 +This is the second line.
 +This is line 4."
@@ -94,8 +99,8 @@ assert-diff ""
 
 git reset > /dev/null
 
-echo "delete one lines --------------------------------------------------------"
-run-git-crecord " ljj s"
+echo "delete one line ---------------------------------------------------------"
+run-git-crecord " ljjj s"
 assert-diff "-This is line 1.
 -This is line 3."
 
@@ -127,14 +132,14 @@ assert-diff ""
 git reset > /dev/null
 
 echo "add lines of second hunk ------------------------------------------------"
-run-git-crecord " ljjj sq "
+run-git-crecord " ljjjj sq "
 assert-diff "-This is the second line.
 +This is line 2."
 
 git reset > /dev/null
 
 echo "add some lines of all hunks ---------------------------------------------"
-run-git-crecord " ljj jj jj j s"
+run-git-crecord " ljjj jj jj j s"
 assert-diff "-This is the second line.
 -This is line 11."
 
@@ -177,6 +182,19 @@ echo "test with +++ line ------------------------------------------------------"
 echo "++++" >> b_file.txt
 run-git-crecord "s"
 assert-diff ""
+
+echo "test unstage ------------------------------------------------------------"
+echo new line1 > new.txt
+echo new line2 >> new.txt
+git add new.txt
+run-git-crecord-reverse 'j k lj Gkljj s'
+assert-status 'MM a_file.txt
+M  b_file.txt
+AM new.txt
+?? sub/'
+assert-diff '-This is the second line.
++This is line 2.
++new line2'
 
 popd > /dev/null # $REPO_DIR
 

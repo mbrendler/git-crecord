@@ -4,13 +4,13 @@ require_relative 'diff/file'
 
 module GitCrecord
   module Diff
-    def self.parse(diff)
+    def self.parse(diff, reverse = false)
       files = []
       enum = diff.lines.each
       loop do
         line = enum.next
         line.chomp!
-        next files << parse_file_header(line, enum) if file_start?(line)
+        next files << parse_file_head(line, enum, reverse) if file_start?(line)
         next files[-1] << line if hunk_start?(line)
         files[-1].add_hunk_line(line)
       end
@@ -25,11 +25,14 @@ module GitCrecord
       line.start_with?('@@')
     end
 
-    def self.parse_file_header(line, enum)
-      enum.next # index ...
+    def self.parse_file_head(line, enum, reverse)
+      index_line = enum.next # index ... or new ...
+      is_new_file = index_line.start_with?('new')
+      enum.next if is_new_file
       enum.next # --- ...
       enum.next # +++ ...
-      File.new(*parse_filenames(line))
+      type = is_new_file ? :untracked : :modified
+      File.new(*parse_filenames(line), type: type, reverse: reverse)
     end
 
     def self.parse_filenames(line)
