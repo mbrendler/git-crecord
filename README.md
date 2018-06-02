@@ -56,6 +56,5 @@ $ ln -s bin/git-crecord /usr/bin/git-crecord
 
 Tests:
 ```shell
-$ bundle exec rake test
-$ bundle exec rake systemtest
+$ bundle exec rake
 ```
