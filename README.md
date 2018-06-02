@@ -15,6 +15,7 @@ $ gem install git-crecord
 ```shell
 $ git crecord
 $ git crecord --untracked-files  # show untracked files
+$ git crecord --reverse          # unstage hunks
 ```
 
 Key-bindings:
