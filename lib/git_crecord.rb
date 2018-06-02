@@ -25,7 +25,7 @@ module GitCrecord
   end
 
   def self.reverse?(argv)
-    argv.include?('--revese') || argv.include?('-R')
+    argv.include?('--reverse') || argv.include?('-R')
   end
 
   def self.run(with_untracked_files: false, reverse: false)
@@ -46,7 +46,7 @@ module GitCrecord
       usage: git crecord [<options>]
 
         -u, --untracked-files  -- show untracked files
-        -R, --revese           -- unstage hunks
+        -R, --reverse          -- unstage hunks
         --version              -- show version information
         -h                     -- this help message
 
