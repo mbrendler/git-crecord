@@ -4,13 +4,15 @@ set -euo pipefail
 
 function assert-equal() {
   local expected=$1
-  local actual=$1
+  local actual=$2
   if test "$expected" != "$actual" ; then
-    cat << 'EOF'
+    cat << EOF
 expect:
-$expect
+$expected
 but got:
 $actual
+EOF
+    cat << 'EOF'
  ____             _
 |  _ \ __ _ _ __ (_) ___
 | |_) / _` | '_ \| |/ __|
