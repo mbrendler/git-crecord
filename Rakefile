@@ -3,6 +3,7 @@
 require 'rake'
 require 'rake/testtask'
 require 'bundler/gem_tasks'
+require 'rubocop/rake_task'
 
 Rake::TestTask.new do |t|
   t.test_files = FileList['test/git_crecord/**/*test.rb']
@@ -13,9 +14,6 @@ task :systemtest do
   sh(File.join(__dir__, 'test/system-test.sh'))
 end
 
-desc 'run rubocop'
-task :rubocop do
-  sh('rubocop')
-end
+RuboCop::RakeTask.new
 
 task default: %i[test systemtest rubocop]
