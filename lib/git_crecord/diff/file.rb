@@ -21,6 +21,7 @@ module GitCrecord
       def to_s
         prefix = { modified: 'M', untracked: '?' }.fetch(type)
         return "#{prefix} #{@filename_a}" if @filename_a == @filename_b
+
         "#{prefix} #{filename_a} -> #{filename_b}"
       end
 
@@ -32,6 +33,7 @@ module GitCrecord
       def strings(width)
         result = super
         return result unless expanded
+
         result += info_string.scan(/.{1,#{content_width(width)}}/)
         result << ''
       end
@@ -55,6 +57,7 @@ module GitCrecord
 
       def generate_diff
         return unless selected
+
         [
           "diff --git a/#{@filename_a} b/#{@filename_b}",
           "--- a/#{@filename_a}",

@@ -55,6 +55,7 @@ module GitCrecord
       def selected
         s = selectable_subs.map(&:selected).uniq
         return s[0] if s.size == 1
+
         :partly
       end
 
@@ -64,6 +65,7 @@ module GitCrecord
 
       def style(is_highlighted)
         return Curses::A_BOLD | UI::Color.hl if is_highlighted
+
         Curses::A_BOLD | UI::Color.normal
       end
 
@@ -74,6 +76,7 @@ module GitCrecord
       def prefix(line_number)
         show_selection_marker = line_number.zero? && selectable?
         return @selection_marker_map.fetch(selected) if show_selection_marker
+
         ' ' * SELECTION_MARKER_WIDTH
       end
 

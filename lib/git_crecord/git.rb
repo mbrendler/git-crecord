@@ -12,6 +12,7 @@ module GitCrecord
       diff = selected_files.map(&:generate_diff).join("\n")
       status = _stage(diff, reverse).success?
       return status unless reverse
+
       reset_files(untracked_files.select { |file| file.selected == true })
       true
     end

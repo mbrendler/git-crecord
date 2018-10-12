@@ -12,6 +12,7 @@ module GitCrecord
         line.chomp!
         next files << parse_file_head(line, enum, reverse) if file_start?(line)
         next files[-1] << line if hunk_start?(line)
+
         files[-1].add_hunk_line(line)
       end
       files
@@ -69,6 +70,7 @@ module GitCrecord
     def self.file_lines(filename)
       encoding = file_encoding(filename)
       return [[], 'binary'] if encoding == 'binary'
+
       [::File.open(filename, "r:#{encoding}", &:readlines), nil]
     end
   end

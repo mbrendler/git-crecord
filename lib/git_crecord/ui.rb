@@ -46,6 +46,7 @@ module GitCrecord
       loop do
         c = win.getch
         next if ACTIONS[c].nil?
+
         quit = win.send(ACTIONS[c])
         break quit if quit == :quit
       end

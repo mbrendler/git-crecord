@@ -79,6 +79,7 @@ module GitCrecord
       def generate_diff
         return " #{@line[1..-1]}" if !selected && del?
         return @line if selected
+
         nil
       end
 
@@ -86,6 +87,7 @@ module GitCrecord
         return UI::Color.hl if is_highlighted
         return UI::Color.green if add?
         return UI::Color.red if del?
+
         UI::Color.normal
       end
     end

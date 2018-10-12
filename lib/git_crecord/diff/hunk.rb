@@ -28,6 +28,7 @@ module GitCrecord
 
       def generate_diff
         return nil unless selected
+
         [generate_header, *subs.map(&:generate_diff).compact].join("\n")
       end
 
@@ -35,6 +36,7 @@ module GitCrecord
         old_start, old_count, new_start, new_count = parse_header
         selectable_subs.each do |sub|
           next if sub.selected
+
           new_count -= 1 if sub.add?
           new_count += 1 if sub.del?
         end
@@ -44,6 +46,7 @@ module GitCrecord
       def parse_header
         match = @head.match(/@@ -(\d+)(,(\d+))? \+(\d+)(,(\d+))? @@/)
         raise "mismatching hunk-header - '#{@head}'" if match.nil?
+
         [match[1], match[3] || 1, match[4], match[6] || 1].map(&:to_i)
       end
     end

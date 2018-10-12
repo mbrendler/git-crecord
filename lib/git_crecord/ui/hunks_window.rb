@@ -41,6 +41,7 @@ module GitCrecord
         new_width = Curses.cols
         new_height = [Curses.lines, content_height(new_width)].max
         return if width == new_width && @win.maxy == new_height
+
         @win.resize(new_height, new_width)
         redraw
       end
@@ -61,6 +62,7 @@ module GitCrecord
 
       def move_highlight(to)
         return if to == @highlighted || to.nil?
+
         from = @highlighted
         @highlighted = to
         from.print(self, from.y1 - 1, false)
@@ -74,6 +76,7 @@ module GitCrecord
         @win.addstr(str)
         fill_size = width - @win.curx
         return unless fill && fill_size.positive?
+
         @win.addstr((fill * fill_size)[0..fill_size])
       end
 
@@ -81,6 +84,7 @@ module GitCrecord
         list.each do |entry|
           line_number = entry.print(self, line_number, entry == @highlighted)
           next unless entry.expanded
+
           line_number = print_list(entry.subs, line_number)
           addstr('', line_number += 1, fill: '_') if entry.is_a?(Diff::File)
         end
@@ -91,6 +95,7 @@ module GitCrecord
         @visibles = @files.each_with_object([]) do |entry, vs|
           vs << entry
           next unless entry.expanded
+
           entry.selectable_subs.each do |entryy|
             vs << entryy
             vs.concat(entryy.selectable_subs) if entryy.expanded

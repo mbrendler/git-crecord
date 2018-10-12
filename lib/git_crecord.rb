@@ -21,6 +21,7 @@ module GitCrecord
 
   def self.untracked_files?(argv)
     return false if reverse?(argv)
+
     argv.include?('--untracked-files') || argv.include?('-u')
   end
 
@@ -31,12 +32,15 @@ module GitCrecord
   def self.run(with_untracked_files: false, reverse: false)
     toplevel_dir = Git.toplevel_dir
     return false if toplevel_dir.empty?
+
     Dir.chdir(toplevel_dir) do
       files = Diff.parse(Git.diff(staged: reverse), reverse)
       files.concat(Diff.untracked_files(Git.status)) if with_untracked_files
       return false if files.empty?
+
       result = UI.run(files)
       return result.call(reverse) == true if result.respond_to?(:call)
+
       true
     end
   end
