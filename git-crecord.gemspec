@@ -26,7 +26,6 @@ GemSpec = Gem::Specification.new do |spec|
   end
   spec.test_files = `git ls-files`.split($RS).grep(%r{^(spec|test)/})
   spec.executables = %w[git-crecord]
-  spec.has_rdoc = false
   spec.add_dependency 'curses', '~>1.0'
   spec.add_development_dependency 'minitest', '~> 5.8', '>= 5.8.4'
   spec.add_development_dependency 'rake', '~> 10.1', '>= 10.1.1'
