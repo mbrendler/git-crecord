@@ -60,7 +60,7 @@ module GitCrecord
     end
 
     def self.diff(staged: false)
-      `git diff --no-ext-diff --no-color #{staged ? '--staged' : ''}`
+      `git diff --no-ext-diff --no-color -D #{staged ? '--staged' : ''}`
     end
 
     def self.toplevel_dir
