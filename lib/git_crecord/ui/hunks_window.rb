@@ -25,6 +25,10 @@ module GitCrecord
       delegate getch: :@win
       def_delegator :@win, :maxx, :width
 
+      def highlight_position
+        "#{@visibles.index(@highlighted) + 1}/#{@visibles.size}"
+      end
+
       def refresh
         @win.refresh(scroll_position, 0, 0, 0, Curses.lines - 1, width)
       end
