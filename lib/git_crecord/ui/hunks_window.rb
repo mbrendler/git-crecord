@@ -30,7 +30,7 @@ module GitCrecord
       end
 
       def refresh
-        @win.refresh(scroll_position, 0, 0, 0, Curses.lines - 1, width)
+        @win.refresh(scroll_position, 0, 1, 0, Curses.lines - 1, width)
       end
 
       def redraw
@@ -41,7 +41,7 @@ module GitCrecord
 
       def resize
         new_width = Curses.cols
-        new_height = [Curses.lines, content_height(new_width)].max
+        new_height = [Curses.lines - 1, content_height(new_width)].max
         return if width == new_width && @win.maxy == new_height
 
         @win.resize(new_height, new_width)
