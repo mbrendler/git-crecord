@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'forwardable'
 require 'curses'
 require_relative 'color'
 require_relative 'help_window'
@@ -9,6 +10,8 @@ require_relative '../quit_action'
 module GitCrecord
   module UI
     class HunksWindow
+      extend Forwardable
+
       def initialize(win, files)
         @win = win
         @files = files
@@ -19,13 +22,8 @@ module GitCrecord
         resize
       end
 
-      def getch
-        @win.getch
-      end
-
-      def width
-        @win.maxx
-      end
+      delegate getch: :@win
+      def_delegator :@win, :maxx, :width
 
       def refresh
         @win.refresh(scroll_position, 0, 0, 0, Curses.lines - 1, width)
