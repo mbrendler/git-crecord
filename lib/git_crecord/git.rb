@@ -67,6 +67,10 @@ module GitCrecord
       `git rev-parse --show-toplevel`.chomp
     end
 
+    def self.branch
+      `git rev-parse --abbrev-ref HEAD`.chomp
+    end
+
     def self.tab
       @tab ||= ' ' * [2, `git config crecord.tabwidth`.to_i].max
     end
