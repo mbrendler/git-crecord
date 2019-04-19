@@ -3,6 +3,7 @@
 require 'curses'
 require_relative 'ui/color'
 require_relative 'ui/hunks_window'
+require_relative 'ui/status_bar'
 
 module GitCrecord
   module UI
@@ -44,6 +45,7 @@ module GitCrecord
 
     def self.run_loop(win)
       loop do
+        StatusBar.refresh(win)
         c = win.getch
         next if ACTIONS[c].nil?
 
