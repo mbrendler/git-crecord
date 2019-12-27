@@ -1,66 +1,72 @@
 # frozen_string_literal: true
 
 require_relative 'diff/file'
+require_relative 'git'
 
 module GitCrecord
   module Diff
-    def self.parse(diff, reverse = false)
-      files = []
-      enum = diff.lines.each
-      loop do
-        line = enum.next
-        line.chomp!
-        next files << parse_file_head(line, enum, reverse) if file_start?(line)
-        next files[-1] << line if hunk_start?(line)
+    def self.create(reverse: false, untracked: false)
+      GitCrecord::Git.status.lines.map do |file_status|
+        status = file_status[reverse ? 0 : 1].downcase
+        filename = file_status.chomp[3..-1]
+        next if status == ' ' || status == '?' && !untracked
 
-        files[-1].add_hunk_line(line)
-      end
-      files
-    end
-
-    def self.file_start?(line)
-      line.start_with?('diff')
-    end
-
-    def self.hunk_start?(line)
-      line.start_with?('@@')
-    end
-
-    def self.parse_file_head(line, enum, reverse)
-      index_line = enum.next # index ... or new ...
-      is_new_file = index_line.start_with?('new')
-      enum.next if is_new_file
-      enum.next # --- ...
-      enum.next # +++ ...
-      type = is_new_file ? :untracked : :modified
-      File.new(*parse_filenames(line), type: type, reverse: reverse)
-    end
-
-    def self.parse_filenames(line)
-      line.match(%r{a/(.*) b/(.*)$})[1..2]
-    end
-
-    def self.untracked_files(git_status)
-      git_status.lines.select { |l| l.start_with?('??') }.flat_map do |path|
-        path = path.chomp[3..-1]
-        ::File.directory?(path) ? untracked_dir(path) : untracked_file(path)
+        method = "handle_status_#{status}"
+        send(method, filename, reverse: reverse) if respond_to?(method)
       end.compact
     end
 
-    def self.untracked_file(filename)
+    def self.handle_status_m(filename, reverse: false)
+      file = File.new(filename, filename, type: :modified, reverse: reverse)
+      diff_lines = Git.diff(filename: filename, staged: reverse).lines[4..-1]
+      diff_lines.each do |line|
+        handle_line(file, line)
+      end
+      file
+    end
+
+    def self.handle_status_a(filename, reverse: false)
+      file = File.new(filename, filename, type: :new, reverse: reverse)
+      diff_lines = Git.diff(filename: filename, staged: reverse).lines[5..-1]
+      file.make_empty if diff_lines.nil?
+      (diff_lines || []).each do |line|
+        handle_line(file, line)
+      end
+      file
+    end
+
+    def self.handle_status_?(filename, **_)
       File.new(filename, filename, type: :untracked).tap do |file|
         lines, err = file_lines(filename)
-        file << "@@ -0,0 +1,#{lines.size} @@"
-        file.subs[0].subs << PseudoLine.new(err) if lines.empty?
-        lines.each { |line| file.add_hunk_line("+#{line.chomp}") }
+        if lines.empty?
+          file.make_empty(err)
+        else
+          file << "@@ -0,0 +1,#{lines.size} @@"
+          lines.each { |line| file.add_hunk_line("+#{line.chomp}") }
+        end
         file.selected = false
       end
     end
 
-    def self.untracked_dir(path)
-      Dir.glob(::File.join(path, '**/*')).map do |filename|
-        untracked_file(filename) unless ::File.directory?(filename)
+    # o   ' ' = unmodified
+    # o   M = modified
+    # o   A = added
+    # o   D = deleted
+    # o   R = renamed
+    # o   C = copied
+    # o   U = updated but unmerged
+
+    def self.handle_line(file, line)
+      line.chomp!
+      if hunk_start?(line)
+        file << line
+      else
+        file.add_hunk_line(line)
       end
+    end
+
+    def self.hunk_start?(line)
+      line.start_with?('@@')
     end
 
     def self.file_encoding(filename)
@@ -68,6 +74,8 @@ module GitCrecord
     end
 
     def self.file_lines(filename)
+      return [[], 'empty'] if ::File.size(filename).zero?
+
       encoding = file_encoding(filename)
       return [[], 'binary'] if encoding == 'binary'
 

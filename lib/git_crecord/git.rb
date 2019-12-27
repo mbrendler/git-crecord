@@ -7,13 +7,15 @@ module GitCrecord
   module Git
     def self.stage(files, reverse = false)
       selected_files = files.select(&:selected)
-      untracked_files = selected_files.select { |file| file.type == :untracked }
-      add_files(untracked_files) unless reverse
+      add_untracked_files(selected_files) unless reverse
       diff = selected_files.map(&:generate_diff).join("\n")
       status = _stage(diff, reverse).success?
       return status unless reverse
 
-      reset_files(untracked_files.select { |file| file.selected == true })
+      files_to_reset = selected_files.select do |file|
+        file.type == :new && file.selected == true
+      end
+      reset_files(files_to_reset)
       true
     end
 
@@ -29,8 +31,10 @@ module GitCrecord
       status
     end
 
-    def self.add_files(files)
+    def self.add_untracked_files(files)
       files.each do |file|
+        next if file.type != :untracked
+
         success = add_file(file.filename_a)
         raise "could not add file #{file.filename_a}" unless success
       end
@@ -52,15 +56,17 @@ module GitCrecord
     end
 
     def self.status
-      `git status --porcelain`
+      `git status --porcelain --untracked-files=all`
     end
 
     def self.commit
       exec('git commit')
     end
 
-    def self.diff(staged: false)
-      `git diff --no-ext-diff --no-color -D #{staged ? '--staged' : ''}`
+    def self.diff(filename: nil, staged: false)
+      filename = "'#{filename}'" if filename
+      staged_option = staged ? '--staged' : ''
+      `git diff --no-ext-diff --no-color -D #{staged_option} #{filename}`
     end
 
     def self.toplevel_dir

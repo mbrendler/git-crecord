@@ -27,6 +27,7 @@ module GitCrecord
         @reverse = reverse
         @selection_marker_map = reverse ? REVERSE_SELECTED_MAP : SELECTED_MAP
         @subs = []
+        @selected = true
       end
 
       def strings(width)
@@ -53,6 +54,8 @@ module GitCrecord
       end
 
       def selected
+        return @selected if selectable_subs.empty?
+
         s = selectable_subs.map(&:selected).uniq
         return s[0] if s.size == 1
 
@@ -60,7 +63,11 @@ module GitCrecord
       end
 
       def selected=(value)
-        selectable_subs.each { |sub| sub.selected = value }
+        if selectable_subs.empty?
+          @selected = value
+        else
+          selectable_subs.each { |sub| sub.selected = value }
+        end
       end
 
       def style(is_highlighted)
@@ -90,6 +97,11 @@ module GitCrecord
           win.addstr(string, attr: style, fill: ' ')
         end
         @y2 = line_number
+      end
+
+      def make_empty(type = 'empty')
+        self << '@@ -0,0 +1,0 @@'
+        subs[0].subs << PseudoLine.new(type)
       end
     end
   end

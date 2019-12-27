@@ -6,12 +6,10 @@ require_relative '../ui/color'
 module GitCrecord
   module Diff
     class PseudoLine < Difference
-      attr_accessor :selected
-
       def initialize(line)
         @line = line || 'file is empty'
-        @selected = false
         super()
+        @selected = false
       end
 
       def to_s
@@ -23,7 +21,7 @@ module GitCrecord
       end
 
       def selectable?
-        true
+        false
       end
 
       def expanded
@@ -40,11 +38,8 @@ module GitCrecord
     end
 
     class Line < Difference
-      attr_reader :selected
-
       def initialize(line, reverse: false)
         @line = line
-        @selected = true
         super(reverse: reverse)
       end
 

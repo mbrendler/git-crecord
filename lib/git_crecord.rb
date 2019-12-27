@@ -34,8 +34,7 @@ module GitCrecord
     return false if toplevel_dir.empty?
 
     Dir.chdir(toplevel_dir) do
-      files = Diff.parse(Git.diff(staged: reverse), reverse)
-      files.concat(Diff.untracked_files(Git.status)) if with_untracked_files
+      files = Diff.create(reverse: reverse, untracked: with_untracked_files)
       return false if files.empty?
 
       result = UI.run(files)

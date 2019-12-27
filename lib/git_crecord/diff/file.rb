@@ -19,7 +19,7 @@ module GitCrecord
       end
 
       def to_s
-        prefix = { modified: 'M', untracked: '?' }.fetch(type)
+        prefix = { modified: 'M', new: 'A', untracked: '?' }.fetch(type)
         return "#{prefix} #{@filename_a}" if @filename_a == @filename_b
 
         "#{prefix} #{filename_a} -> #{filename_b}"
