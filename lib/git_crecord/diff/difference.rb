@@ -98,11 +98,6 @@ module GitCrecord
         end
         @y2 = line_number
       end
-
-      def make_empty(type = 'empty')
-        self << '@@ -0,0 +1,0 @@'
-        subs[0].subs << PseudoLine.new(type)
-      end
     end
   end
 end

@@ -68,6 +68,10 @@ module GitCrecord
       end
 
       alias prefix_style style
+
+      def make_empty(type = 'empty')
+        subs << PseudoLine.new(type)
+      end
     end
   end
 end
