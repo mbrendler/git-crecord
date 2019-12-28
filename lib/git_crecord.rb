@@ -37,6 +37,7 @@ module GitCrecord
       files = Diff.create(reverse: reverse, untracked: with_untracked_files)
       return false if files.empty?
 
+      UI::StatusBar.reverse = reverse
       result = UI.run(files)
       return result.call(reverse) == true if result.respond_to?(:call)
 

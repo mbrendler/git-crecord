@@ -20,7 +20,7 @@ module GitCrecord
       end
 
       def self.write_right(main_win)
-        str = " #{main_win.highlight_position} "
+        str = " #{reverse ? '[reverse]' : ''} #{main_win.highlight_position} "
         win.setpos(0, [0, win.maxx - str.size].max)
         win.addstr(str)
       end
@@ -38,6 +38,14 @@ module GitCrecord
 
       def self.branch
         @branch = Git.branch
+      end
+
+      def self.reverse
+        @reverse
+      end
+
+      def self.reverse=(reverse)
+        @reverse = reverse
       end
     end
   end
