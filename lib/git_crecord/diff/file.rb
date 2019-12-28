@@ -72,6 +72,27 @@ module GitCrecord
       def make_empty(type = 'empty')
         subs << PseudoLine.new(type)
       end
+
+      def empty?
+        selectable_subs.empty?
+      end
+
+      def stage_steps
+        case type
+        when :modified then %i[stage]
+        when :new then empty? ? %i[add_file_full] : %i[stage]
+        when :untracked then empty? ? %i[add_file_full] : %i[add_file stage]
+        else raise "unknown file type - #{type.inspect}"
+        end
+      end
+
+      def unstage_steps
+        case type
+        when :modified then %i[unstage]
+        when :new then %i[unstage]
+        else raise "unknown file type - #{type.inspect}"
+        end
+      end
     end
   end
 end
