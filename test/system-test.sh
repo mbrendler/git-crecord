@@ -196,6 +196,29 @@ assert-diff '-This is the second line.
 +This is line 2.
 +new line2'
 
+echo "test add empty files ----------------------------------------------------"
+git add .
+touch empty.txt
+touch empty-untrached.txt
+git add -N empty.txt
+run-git-crecord 'AAs'
+assert-status 'M  a_file.txt
+M  b_file.txt
+A  empty-untrached.txt
+A  empty.txt
+A  new.txt
+A  sub/sub2/sub-file.txt'
+
+echo "unstage empty file ------------------------------------------------------"
+run-git-crecord-reverse 'AG s'
+assert-status 'M  a_file.txt
+M  b_file.txt
+A  empty-untrached.txt
+A  empty.txt
+A  new.txt
+?? sub/'
+
+
 popd > /dev/null # $REPO_DIR
 
 cat << 'EOF'

@@ -5,18 +5,29 @@ require 'open3'
 
 module GitCrecord
   module Git
-    def self.stage(files, reverse = false)
-      selected_files = files.select(&:selected)
-      add_untracked_files(selected_files) unless reverse
-      diff = selected_files.map(&:generate_diff).join("\n")
-      status = _stage(diff, reverse).success?
-      return status unless reverse
+    def self.stage_files(files, reverse = false)
+      method_name = reverse ? :unstage_steps : :stage_steps
+      success = true
+      files.each do |file|
+        next unless file.selected
 
-      files_to_reset = selected_files.select do |file|
-        file.type == :new && file.selected == true
+        file.send(method_name).each do |step|
+          success &&= send(step, file)
+        end
       end
-      reset_files(files_to_reset)
-      true
+      success
+    end
+
+    def self.stage(file)
+      _stage(file.generate_diff, false)
+    end
+
+    def self.unstage(file)
+      success = _stage(file.generate_diff, true)
+      return false unless success
+      return true unless file.type == :new && file.selected == true
+
+      reset_file(file)
     end
 
     def self._stage(diff, reverse = false)
@@ -28,31 +39,19 @@ module GitCrecord
       LOGGER.info('stdout/stderr:')
       LOGGER.info(content)
       LOGGER.info("return code: #{status}")
-      status
+      status.success?
     end
 
-    def self.add_untracked_files(files)
-      files.each do |file|
-        next if file.type != :untracked
-
-        success = add_file(file.filename_a)
-        raise "could not add file #{file.filename_a}" unless success
-      end
+    def self.add_file(file)
+      system("git add -N #{file.filename_a}")
     end
 
-    def self.add_file(filename)
-      system("git add -N #{filename}")
+    def self.add_file_full(file)
+      system("git add #{file.filename_a}")
     end
 
-    def self.reset_files(files)
-      files.each do |file|
-        success = reset_file(file.filename_a)
-        raise "could not reset file #{file.filename_a}" unless success
-      end
-    end
-
-    def self.reset_file(filename)
-      system("git reset -q #{filename}")
+    def self.reset_file(file)
+      system("git reset -q #{file.filename_a}")
     end
 
     def self.status

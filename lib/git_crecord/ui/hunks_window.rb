@@ -110,11 +110,13 @@ module GitCrecord
       end
 
       def stage
-        QuitAction.new { |reverse| Git.stage(@files, reverse) }
+        QuitAction.new { |reverse| Git.stage_files(@files, reverse) }
       end
 
       def commit
-        QuitAction.new { |reverse| Git.stage(@files, reverse) && Git.commit }
+        QuitAction.new do |reverse|
+          Git.stage_files(@files, reverse) && Git.commit
+        end
       end
 
       def highlight_next
