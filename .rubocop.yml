@@ -1,7 +1,7 @@
 ---
 require: rubocop-performance
 
-Documentation:
+Style/Documentation:
   Enabled: false
 
 Metrics/ClassLength:
