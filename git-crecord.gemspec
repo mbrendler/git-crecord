@@ -21,10 +21,10 @@ GemSpec = Gem::Specification.new do |spec|
     'issue_tracker' => 'https://github.com/mbrendler/git-crecord/issues'
   }
   spec.require_paths = %w[lib]
-  spec.files = `git ls-files`.split($RS).delete_if do |f|
+  spec.files = `git ls-files`.split("\n").delete_if do |f|
     %r{^(spec|test)/} =~ f
   end
-  spec.test_files = `git ls-files`.split($RS).grep(%r{^(spec|test)/})
+  spec.test_files = `git ls-files`.split("\n").grep(%r{^(spec|test)/})
   spec.executables = %w[git-crecord]
   spec.add_dependency 'curses'
   spec.add_development_dependency 'minitest'
