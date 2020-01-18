@@ -218,6 +218,15 @@ A  empty.txt
 A  new.txt
 ?? sub/'
 
+echo "move and modify file ----------------------------------------------------"
+git reset --hard > /dev/null
+git mv b_file.txt c_file.txt
+echo another line > c_file.txt
+run-git-crecord 's'
+assert-status 'D  b_file.txt
+A  c_file.txt
+?? sub/'
+
 
 popd > /dev/null # $REPO_DIR
 

@@ -17,6 +17,8 @@ module GitCrecord
     end
 
     def self.handle_status_m(filename, reverse: false)
+      filename, filename_b = filename.split(' -> ')
+      filename = filename_b unless filename_b.nil?
       file = File.new(filename, filename, type: :modified, reverse: reverse)
       diff_lines = Git.diff(filename: filename, staged: reverse).lines[4..-1]
       diff_lines.each do |line|
