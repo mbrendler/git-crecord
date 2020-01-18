@@ -22,7 +22,7 @@ module GitCrecord
         prefix = { modified: 'M', new: 'A', untracked: '?' }.fetch(type)
         return "#{prefix} #{@filename_a}" if @filename_a == @filename_b
 
-        "#{prefix} #{filename_a} -> #{filename_b}"
+        "#{prefix} #{filename_a} -> #{@filename_b}"
       end
 
       def info_string
