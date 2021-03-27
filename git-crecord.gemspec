@@ -5,7 +5,7 @@ require_relative 'lib/git_crecord/version'
 GemSpec = Gem::Specification.new do |spec|
   spec.required_rubygems_version = Gem::Requirement.new('>= 1.3.6')
   spec.platform = Gem::Platform::RUBY
-  spec.required_ruby_version = '>= 2.3.0'
+  spec.required_ruby_version = '>= 3.0.0'
   spec.name = 'git-crecord'
   spec.version = GitCrecord::VERSION
   spec.authors = 'Maik Brendler'
@@ -30,5 +30,7 @@ GemSpec = Gem::Specification.new do |spec|
   spec.add_development_dependency 'minitest'
   spec.add_development_dependency 'rake'
   spec.add_development_dependency 'rubocop', '>= 0.56.0'
+  spec.add_development_dependency 'rubocop-minitest'
   spec.add_development_dependency 'rubocop-performance'
+  spec.add_development_dependency 'rubocop-rake'
 end

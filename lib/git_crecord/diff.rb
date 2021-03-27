@@ -8,7 +8,7 @@ module GitCrecord
     def self.create(reverse: false, untracked: false)
       GitCrecord::Git.status.lines.map do |file_status|
         status = file_status[reverse ? 0 : 1].downcase
-        filename = file_status.chomp[3..-1]
+        filename = file_status.chomp[3..]
         next if status == ' ' || status == '?' && !untracked
 
         method = "handle_status_#{status}"
@@ -20,7 +20,7 @@ module GitCrecord
       filename, filename_b = filename.split(' -> ')
       filename = filename_b unless filename_b.nil?
       file = File.new(filename, filename, type: :modified, reverse: reverse)
-      diff_lines = Git.diff(filename: filename, staged: reverse).lines[4..-1]
+      diff_lines = Git.diff(filename: filename, staged: reverse).lines[4..]
       diff_lines.each do |line|
         handle_line(file, line)
       end
@@ -29,7 +29,7 @@ module GitCrecord
 
     def self.handle_status_a(filename, reverse: false)
       file = File.new(filename, filename, type: :new, reverse: reverse)
-      diff_lines = Git.diff(filename: filename, staged: reverse).lines[5..-1]
+      diff_lines = Git.diff(filename: filename, staged: reverse).lines[5..]
       file.make_empty if diff_lines.nil?
       (diff_lines || []).each do |line|
         handle_line(file, line)

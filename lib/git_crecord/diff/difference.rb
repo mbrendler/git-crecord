@@ -5,8 +5,7 @@ require_relative '../ui/color'
 module GitCrecord
   module Diff
     class Difference
-      attr_accessor :expanded
-      attr_accessor :y1, :y2
+      attr_accessor :expanded, :y1, :y2
       attr_reader :subs
 
       SELECTED_MAP = {

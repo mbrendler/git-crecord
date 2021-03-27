@@ -13,4 +13,4 @@ Metrics/BlockLength:
 AllCops:
   DisplayCopNames: true
   DisplayStyleGuide: true
-  TargetRubyVersion: 2.3
+  NewCops: enable

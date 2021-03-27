@@ -7,8 +7,7 @@ require_relative '../ui/color'
 module GitCrecord
   module Diff
     class File < Difference
-      attr_reader :filename_a
-      attr_reader :type
+      attr_reader :filename_a, :type
 
       def initialize(filename_a, filename_b, type: :modified, reverse: false)
         @filename_a = filename_a
@@ -87,11 +86,9 @@ module GitCrecord
       end
 
       def unstage_steps
-        case type
-        when :modified then %i[unstage]
-        when :new then %i[unstage]
-        else raise "unknown file type - #{type.inspect}"
-        end
+        return %i[unstage] if %i[new modified].include?(type)
+
+        raise "unknown file type - #{type.inspect}"
       end
     end
   end

@@ -5,7 +5,7 @@ require 'open3'
 
 module GitCrecord
   module Git
-    def self.stage_files(files, reverse = false)
+    def self.stage_files(files, reverse: false)
       method_name = reverse ? :unstage_steps : :stage_steps
       success = true
       files.each do |file|
@@ -19,18 +19,18 @@ module GitCrecord
     end
 
     def self.stage(file)
-      _stage(file.generate_diff, false)
+      _stage(file.generate_diff, reverse: false)
     end
 
     def self.unstage(file)
-      success = _stage(file.generate_diff, true)
+      success = _stage(file.generate_diff, reverse: true)
       return false unless success
       return true unless file.type == :new && file.selected == true
 
       reset_file(file)
     end
 
-    def self._stage(diff, reverse = false)
+    def self._stage(diff, reverse:)
       cmd = "git apply --cached --unidiff-zero #{reverse ? '-R' : ''} - "
       content, status = Open3.capture2e(cmd, stdin_data: diff)
       LOGGER.info(cmd)

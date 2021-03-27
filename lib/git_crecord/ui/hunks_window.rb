@@ -110,12 +110,12 @@ module GitCrecord
       end
 
       def stage
-        QuitAction.new { |reverse| Git.stage_files(@files, reverse) }
+        QuitAction.new { |reverse| Git.stage_files(@files, reverse: reverse) }
       end
 
       def commit
         QuitAction.new do |reverse|
-          Git.stage_files(@files, reverse) && Git.commit
+          Git.stage_files(@files, reverse: reverse) && Git.commit
         end
       end
 
@@ -138,7 +138,7 @@ module GitCrecord
       def highlight_next_hunk
         index = @visibles.index(@highlighted)
         move_highlight(
-          @visibles[(index + 1)..-1].find { |entry| !entry.subs.empty? }
+          @visibles[(index + 1)..].find { |entry| !entry.subs.empty? }
         )
       end
 

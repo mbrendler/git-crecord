@@ -72,7 +72,7 @@ module GitCrecord
       end
 
       def generate_diff
-        return " #{@line[1..-1]}" if !selected && del?
+        return " #{@line[1..]}" if !selected && del?
         return @line if selected
 
         nil
