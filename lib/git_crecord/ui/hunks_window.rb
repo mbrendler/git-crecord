@@ -9,7 +9,7 @@ require_relative '../quit_action'
 
 module GitCrecord
   module UI
-    class HunksWindow
+    class HunksWindow # rubocop:disable Metrics/ClassLength
       extend Forwardable
 
       def initialize(win, files)
