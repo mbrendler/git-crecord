@@ -6,14 +6,14 @@ require_relative 'git'
 module GitCrecord
   module Diff
     def self.create(reverse: false, untracked: false)
-      GitCrecord::Git.status.lines.map do |file_status|
+      GitCrecord::Git.status.lines.filter_map do |file_status|
         status = file_status[reverse ? 0 : 1].downcase
         filename = file_status.chomp[3..]
-        next if status == ' ' || status == '?' && !untracked
+        next if status == ' ' || (status == '?' && !untracked)
 
         method = "handle_status_#{status}"
         send(method, filename, reverse: reverse) if respond_to?(method)
-      end.compact
+      end
     end
 
     def self.handle_status_m(filename, reverse: false)

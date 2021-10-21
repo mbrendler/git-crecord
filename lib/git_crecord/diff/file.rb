@@ -61,7 +61,7 @@ module GitCrecord
           "diff --git a/#{@filename_a} b/#{@filename_b}",
           "--- a/#{@filename_a}",
           "+++ b/#{@filename_b}",
-          *subs.map(&:generate_diff).compact,
+          *subs.filter_map(&:generate_diff),
           ''
         ].join("\n")
       end

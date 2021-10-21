@@ -29,7 +29,7 @@ module GitCrecord
       def generate_diff
         return nil unless selected
 
-        [generate_header, *subs.map(&:generate_diff).compact].join("\n")
+        [generate_header, *subs.filter_map(&:generate_diff)].join("\n")
       end
 
       def generate_header
