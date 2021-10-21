@@ -2,15 +2,16 @@
 
 require 'rake'
 require 'bundler/gem_tasks'
-require 'rubocop/rake_task'
+
 require 'rspec/core/rake_task'
 RSpec::Core::RakeTask.new(:spec)
 
 desc 'run system tests'
 task :systemtest do
-  sh(File.join(__dir__, 'test/system-test.sh'))
+  sh(File.join(__dir__, 'system-test.sh'))
 end
 
+require 'rubocop/rake_task'
 RuboCop::RakeTask.new
 
 task default: %i[spec systemtest rubocop]
