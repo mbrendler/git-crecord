@@ -1,13 +1,10 @@
 # frozen_string_literal: true
 
 require 'rake'
-require 'rake/testtask'
 require 'bundler/gem_tasks'
 require 'rubocop/rake_task'
-
-Rake::TestTask.new do |t|
-  t.test_files = FileList['test/git_crecord/**/*test.rb']
-end
+require 'rspec/core/rake_task'
+RSpec::Core::RakeTask.new(:spec)
 
 desc 'run system tests'
 task :systemtest do
@@ -16,4 +13,4 @@ end
 
 RuboCop::RakeTask.new
 
-task default: %i[test systemtest rubocop]
+task default: %i[spec systemtest rubocop]

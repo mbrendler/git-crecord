@@ -1,11 +1,14 @@
 ---
 require:
-  - rubocop-minitest
   - rubocop-performance
   - rubocop-rake
+  - rubocop-rspec
 
 Style/Documentation:
   Enabled: false
+
+Metrics/BlockLength:
+  IgnoredMethods: ['describe', 'context']
 
 AllCops:
   DisplayCopNames: true
