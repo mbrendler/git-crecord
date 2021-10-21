@@ -1,6 +1,7 @@
 # git-crecord
 
-Inspired by [crecord mercurial extension](https://bitbucket.org/edgimar/crecord/wiki/Home), git-crecord is an easy way to commit/stage git changes partially.
+Inspired by crecord mercurial extension, git-crecord is an easy way to
+commit/stage git changes partially.
 
 ![Screenshot](/screenshot.jpg?raw=true)
 
