@@ -1,0 +1,2 @@
+clang
+-I/opt/homebrew/opt/libgit2/include
