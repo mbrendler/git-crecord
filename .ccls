@@ -1,2 +1,5 @@
-clang
+cc
+-std=c2x
+-Wall
+-Wpedantic
 -I/opt/homebrew/opt/libgit2/include
