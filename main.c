@@ -52,7 +52,7 @@ int each_file_cb(const git_diff_delta *delta, float progress, void *payload) {
 }
 
 int each_binary_cb(const git_diff_delta *delta, const git_diff_binary *binary,
-                 void *payload) {
+                   void *payload) {
   printf("Binary File: %s\n", delta->new_file.path);
   return 0;
 }
@@ -66,8 +66,41 @@ int each_hunk_cb(const git_diff_delta *delta, const git_diff_hunk *hunk,
 
 int each_line_cb(const git_diff_delta *delta, const git_diff_hunk *hunk,
                  const git_diff_line *line, void *payload) {
-  printf("Line: %d,%d %d,%d %.*s", line->old_lineno, line->new_lineno,
-         line->origin, line->num_lines, (int)line->content_len, line->content);
+  printf("Line: %c %d,%d %d,%d %.*s", line->origin, line->old_lineno,
+         line->new_lineno, line->origin, line->num_lines,
+         (int)line->content_len, line->content);
+  return 0;
+}
+
+int print_cb(const git_diff_delta *delta, const git_diff_hunk *hunk,
+             const git_diff_line *line, void *payload) {
+  if (line != NULL) {
+    printf("Line: %c %d,%d %d,%d %.*s", line->origin, line->old_lineno,
+           line->new_lineno, line->origin, line->num_lines,
+           (int)line->content_len, line->content);
+  } else if (hunk != NULL) {
+    printf("Hunk: %d,%d -> %d,%d\n", hunk->old_start, hunk->old_lines,
+           hunk->new_start, hunk->new_lines);
+  } else {
+    printf("Diff: %s\n", delta->new_file.path);
+  }
+  return 0;
+}
+
+int diff_count_number_of_lines(const git_diff_delta *delta,
+                               const git_diff_hunk *hunk,
+                               const git_diff_line *line, void *count) {
+  if (line) {
+    (*(int *)count)++;
+  }
+  return 0;
+}
+
+int diff_build_ui(const git_diff_delta *delta, const git_diff_hunk *hunk,
+                  const git_diff_line *line, void *payload) {
+  if (line) {
+    ui_add_line(line);
+  }
   return 0;
 }
 
@@ -84,19 +117,35 @@ int main(int argc, const char *argv[]) {
   e(git_diff_index_to_workdir(&diff, repo, NULL, NULL));
   e(git_diff_foreach(diff, each_file_cb, each_binary_cb, each_hunk_cb,
                      each_line_cb, NULL));
-  git_diff_free(diff);
 
-  git_repository_free(repo);
-  git_libgit2_shutdown();
+  int line_count = 0;
+  e(git_diff_print(diff, GIT_DIFF_FORMAT_PATCH, diff_count_number_of_lines,
+                   &line_count));
 
-  ui_init("branch");
-  ui_add_file("a filename");
-  ui_add_file("b filename");
-  /* ui_add_entry("Hello, world!--------------------------------------------------------------------------------------------------------------------------------"); */
+  ui_init("branch", line_count);
+
+  e(git_diff_print(diff, GIT_DIFF_FORMAT_PATCH, diff_build_ui, NULL));
+
+  /* ui_add_file("a filename"); */
+  /* ui_add_file("b filename"); */
+  /* for (int i = 0; i < git_diff_num_deltas(diff); i++) { */
+  /*   const git_diff_delta *delta = git_diff_get_delta(diff, i); */
+  /*   ui_add_file_(delta); */
+  /* } */
+  /* ui_add_entry("Hello,
+   * world!--------------------------------------------------------------------------------------------------------------------------------");
+   */
   /* ui_add_entry("Hello, world!"); */
   const int value = ui_loop();
   ui_close();
   printf("You pressed: %d\n", value);
+
+  e(git_diff_print(diff, GIT_DIFF_FORMAT_PATCH, print_cb, NULL));
+
+  git_diff_free(diff);
+
+  git_repository_free(repo);
+  git_libgit2_shutdown();
 
   return 0;
 }
