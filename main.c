@@ -89,9 +89,13 @@ int print_cb(const git_diff_delta *delta, const git_diff_hunk *hunk,
 
 int diff_count_number_of_lines(const git_diff_delta *delta,
                                const git_diff_hunk *hunk,
-                               const git_diff_line *line, void *count) {
+                               const git_diff_line *line, void *payload) {
   if (line) {
-    (*(int *)count)++;
+    int *counts = (int *)payload;
+    counts[0]++;
+    if (line->origin == 'F') {
+      counts[1]++;
+    }
   }
   return 0;
 }
@@ -118,30 +122,25 @@ int main(int argc, const char *argv[]) {
   e(git_diff_foreach(diff, each_file_cb, each_binary_cb, each_hunk_cb,
                      each_line_cb, NULL));
 
-  int line_count = 0;
+  int counts[2] = {0};
   e(git_diff_print(diff, GIT_DIFF_FORMAT_PATCH, diff_count_number_of_lines,
-                   &line_count));
+                   counts));
 
-  ui_init("branch", line_count);
+  git_reference *head = NULL;
+  e(git_repository_head(&head, repo));
+  const char *branch = git_reference_shorthand(head);
+  ui_init(branch, counts[0], counts[1],
+          strcmp(branch, "main") == 0 || strcmp(branch, "master") == 0);
 
   e(git_diff_print(diff, GIT_DIFF_FORMAT_PATCH, diff_build_ui, NULL));
 
-  /* ui_add_file("a filename"); */
-  /* ui_add_file("b filename"); */
-  /* for (int i = 0; i < git_diff_num_deltas(diff); i++) { */
-  /*   const git_diff_delta *delta = git_diff_get_delta(diff, i); */
-  /*   ui_add_file_(delta); */
-  /* } */
-  /* ui_add_entry("Hello,
-   * world!--------------------------------------------------------------------------------------------------------------------------------");
-   */
-  /* ui_add_entry("Hello, world!"); */
   const int value = ui_loop();
   ui_close();
   printf("You pressed: %d\n", value);
 
   e(git_diff_print(diff, GIT_DIFF_FORMAT_PATCH, print_cb, NULL));
 
+  git_reference_free(head);
   git_diff_free(diff);
 
   git_repository_free(repo);
