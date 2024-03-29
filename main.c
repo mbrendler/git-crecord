@@ -30,21 +30,28 @@ const int GIT_STATUS_INDEX_KNOWN_MASK =
 // GIT_STATUS_WT_RENAMED        R
 // GIT_STATUS_IGNORED           I
 
+char status_flags_to_char(uint32_t status_flags) {
+  if (status_flags & GIT_STATUS_WT_NEW) {
+    if (status_flags & GIT_STATUS_INDEX_KNOWN_MASK) {
+      return 'A';
+    } else {
+      return '?';
+    }
+  } else if (status_flags & GIT_STATUS_WT_MODIFIED) {
+    return 'M';
+  }
+  return ' ';
+}
+
 int status_cb(const char *path, unsigned int status_flags, void *payload) {
   if (status_flags & GIT_STATUS_IGNORED) {
     return 0;
   }
-  if (status_flags & GIT_STATUS_WT_NEW) {
-    if (status_flags & GIT_STATUS_INDEX_KNOWN_MASK) {
-      printf(" A %s\n", path);
-    } else {
-      printf(" ? %s\n", path);
-    }
-  } else if (status_flags & GIT_STATUS_WT_MODIFIED) {
-    printf(" M %s\n", path);
-  }
+  const char status = status_flags_to_char(status_flags);
+  printf(" %c %s\n", status, path);
   return 0;
 }
+
 
 int each_file_cb(const git_diff_delta *delta, float progress, void *payload) {
   printf("File: %s\n", delta->new_file.path);
@@ -103,7 +110,13 @@ int diff_count_number_of_lines(const git_diff_delta *delta,
 int diff_build_ui(const git_diff_delta *delta, const git_diff_hunk *hunk,
                   const git_diff_line *line, void *payload) {
   if (line) {
-    ui_add_line(line);
+    char status_char = ' ';
+    if (line->origin == 'F') {
+      unsigned status = 0;
+      git_status_file(&status, (git_repository*)payload, delta->new_file.path);
+      status_char = status_flags_to_char(status);
+    }
+    ui_add_line(line, delta, status_char);
   }
   return 0;
 }
@@ -119,8 +132,8 @@ int main(int argc, const char *argv[]) {
 
   git_diff *diff = NULL;
   e(git_diff_index_to_workdir(&diff, repo, NULL, NULL));
-  e(git_diff_foreach(diff, each_file_cb, each_binary_cb, each_hunk_cb,
-                     each_line_cb, NULL));
+  /* e(git_diff_foreach(diff, each_file_cb, each_binary_cb, each_hunk_cb, */
+  /*                    each_line_cb, NULL)); */
 
   int counts[2] = {0};
   e(git_diff_print(diff, GIT_DIFF_FORMAT_PATCH, diff_count_number_of_lines,
@@ -132,13 +145,13 @@ int main(int argc, const char *argv[]) {
   ui_init(branch, counts[0], counts[1],
           strcmp(branch, "main") == 0 || strcmp(branch, "master") == 0);
 
-  e(git_diff_print(diff, GIT_DIFF_FORMAT_PATCH, diff_build_ui, NULL));
+  e(git_diff_print(diff, GIT_DIFF_FORMAT_PATCH, diff_build_ui, repo));
 
   const int value = ui_loop();
   ui_close();
   printf("You pressed: %d\n", value);
 
-  e(git_diff_print(diff, GIT_DIFF_FORMAT_PATCH, print_cb, NULL));
+  /* e(git_diff_print(diff, GIT_DIFF_FORMAT_PATCH, print_cb, NULL)); */
 
   git_reference_free(head);
   git_diff_free(diff);

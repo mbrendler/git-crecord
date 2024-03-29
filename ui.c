@@ -2,10 +2,15 @@
 #include <ncurses.h>
 #include <stdlib.h>
 #include <string.h>
-
-#define MAX(x, y) ((x) > (y) ? (x) : (y))
+#include "lib.h"
 
 typedef struct UiFile UiFile;
+
+typedef enum {
+  selected_not,
+  selected_full,
+  selected_part,
+} UiSelected;
 
 typedef struct {
   bool selected;
@@ -38,6 +43,7 @@ typedef struct {
   unsigned highlighted;
   UiColor status_bar_color;
   const char *title;
+  uint64_t start_us;
   unsigned line_count;
   UiLine *lines;
   unsigned file_count;
@@ -49,6 +55,7 @@ static Ui ui = {
     .highlighted = 0,
     .status_bar_color = color_status_bar,
     .title = "",
+    .start_us = 0,
     .line_count = 0,
     .lines = NULL,
     .file_count = 0,
@@ -69,6 +76,7 @@ void ui_init_colors(void) {
 void ui_init(const char *title, int line_count, int file_count, bool warn) {
   ui.title = title;
   ui.status_bar_color = warn ? color_status_bar_warn : color_status_bar;
+  ui.start_us = micros();
   /* ui.line_count = line_count; */
   ui.lines = malloc(sizeof(*(ui.lines)) * line_count);
   ui.files = malloc(sizeof(*(ui.files)) * file_count);
@@ -92,6 +100,7 @@ void ui_close(void) {
       .scroll_offset = 0,
       .highlighted = 0,
       .title = "",
+      .start_us = 0,
       .lines = NULL,
       .files = NULL,
   };
@@ -103,7 +112,8 @@ void ui_close(void) {
 #define ui_line_color(line)                                                    \
   (line->origin == '+' ? color_green : (line->origin == '-' ? color_red : 0))
 
-void ui_add_line(const git_diff_line *line) {
+void ui_add_line(const git_diff_line *line, const git_diff_delta *delta,
+                 char status) {
   unsigned height = 1;
   unsigned y = 0;
   UiLine *entry = &ui.lines[ui.line_count];
@@ -111,11 +121,11 @@ void ui_add_line(const git_diff_line *line) {
   UiFile *file = NULL;
 
   if ('F' == line->origin) {
-    height = 5;
+    height = 3;
     file = &ui.files[ui.file_count];
     ui.file_count++;
     *file = (UiFile){
-        .height = height,
+        .height = height + 1,
         .expanded = false,
         .lines = entry,
         .line_count = 1,
@@ -141,33 +151,37 @@ void ui_add_line(const git_diff_line *line) {
   const char *selected = entry->selected ? "[X]  " : "[ ]  ";
   mvwaddstr(file->win, y, ui_line_x_offset(line),
             line->origin == ' ' ? "     " : selected);
-  waddch(file->win, line->origin);
-  waddnstr(file->win, line->content, line->content_len);
-  mvwchgat(file->win, y, ui_line_x_offset(line) + 4, -1, 0, ui_line_color(line),
-           NULL);
-}
-
-void ui_unhighlight(void) {
-  UiLine *line = &ui.lines[ui.highlighted];
-  mvwchgat(line->file->win, line->y, ui_line_x_offset(line) + 4, -1, 0,
-           ui_line_color(line), NULL);
-}
-
-void ui_highlight(void) {
-  UiLine *line = &ui.lines[ui.highlighted];
-  mvwchgat(line->file->win, line->y, ui_line_x_offset(line) + 4, -1, 0,
-           color_hl, NULL);
-}
-
-void ui_expand_file(void) {
-  if (ui.lines[ui.highlighted].origin == 'F') {
-    ui.lines[ui.highlighted].file->expanded = true;
+  if ('F' == line->origin) {
+    waddch(file->win, status);
+    waddch(file->win, ' ');
+    waddstr(file->win, delta->new_file.path);
+  } else if ('H' == line->origin) {
+    waddnstr(file->win, line->content, line->content_len);
+    mvwchgat(file->win, y, 0, -1, A_BOLD, 0, NULL);
+  } else {
+    waddch(file->win, line->origin);
+    waddnstr(file->win, line->content, line->content_len);
+    mvwchgat(file->win, y, ui_line_x_offset(line) + 4, -1, 0,
+             ui_line_color(line), NULL);
   }
 }
 
-void ui_collaps_file(void) {
-  if (ui.lines[ui.highlighted].origin == 'F') {
-    ui.lines[ui.highlighted].file->expanded = false;
+void ui_unhighlight(void) {
+  const UiLine *line = &ui.lines[ui.highlighted];
+  const int attr = line->origin == 'F' || line->origin == 'H' ? A_BOLD : 0;
+  const int x_offset = ui_line_x_offset(line) + 4;
+  const int color = ui_line_color(line);
+  for (unsigned i = 0; i < line->height; i++) {
+    mvwchgat(line->file->win, line->y + i, x_offset, -1, attr, color, NULL);
+  }
+}
+
+void ui_highlight(void) {
+  const UiLine *line = &ui.lines[ui.highlighted];
+  const int attr = line->origin == 'F' || line->origin == 'H' ? A_BOLD : 0;
+  const int x_offset = ui_line_x_offset(line) + 4;
+  for (unsigned i = 0; i < line->height; i++) {
+    mvwchgat(line->file->win, line->y + i, x_offset, -1, attr, color_hl, NULL);
   }
 }
 
@@ -183,8 +197,9 @@ void ui_update_status_bar(void) {
     return;
   }
   char r_status[available + 1];
-  snprintf(r_status, available, "%d/%d %d", ui.highlighted + 1, ui.line_count,
-           ui.scroll_offset);
+  uint32_t duration = micros() - ui.start_us;
+  snprintf(r_status, available, "%d/%d %uµs", ui.highlighted + 1, ui.line_count,
+           duration);
   mvaddstr(0, COLS - strlen(r_status), r_status);
   mvchgat(0, 0, -1, A_BOLD, ui.status_bar_color, NULL);
 }
@@ -221,9 +236,6 @@ void ui_refresh(void) {
     }
   }
 
-  ui_update_status_bar();
-
-  ui_highlight();
   refresh();
   int y = -ui.scroll_offset + viewport_start;
   for (UiFile *file = ui.files; file < ui.files + ui.file_count; file++) {
@@ -239,13 +251,15 @@ void ui_refresh(void) {
     }
     y += height;
     if (y > viewport_end) {
-      return;
+      break;
     }
   }
   if (y < LINES) {
     move(y, 0);
     clrtobot();
   }
+
+  ui_update_status_bar();
 }
 
 void ui_highlight_next(void) {
@@ -261,8 +275,9 @@ void ui_highlight_next(void) {
       continue;
     }
     ui.highlighted = line - ui.lines;
-    return;
+    break;
   }
+  ui_highlight();
 }
 
 void ui_highlight_prev(unsigned line_index) {
@@ -280,7 +295,20 @@ void ui_highlight_prev(unsigned line_index) {
       continue;
     }
     ui.highlighted = line - ui.lines;
+    ui_highlight();
     return;
+  }
+}
+
+void ui_expand_file(void) {
+  if (ui.lines[ui.highlighted].origin == 'F') {
+    ui.lines[ui.highlighted].file->expanded = true;
+  }
+}
+
+void ui_collaps_file(void) {
+  if (ui.lines[ui.highlighted].origin == 'F') {
+    ui.lines[ui.highlighted].file->expanded = false;
   }
 }
 
@@ -330,14 +358,29 @@ void ui_select_all(void) {
 }
 
 int ui_loop(void) {
-  int c;
-
   for (UiFile *file = ui.files; file < ui.files + ui.file_count; file++) {
+    int lines = 0;
+    int hunks = 0;
+    for (UiLine *line = file->lines; line < file->lines + file->line_count;
+         line++) {
+      if (line->origin == 'H') {
+        hunks++;
+      } else if (line->origin == '+' || line->origin == '-') {
+        lines++;
+      }
+    }
+    mvwprintw(file->win, 1, 8, "%d hunks, %d lines", hunks, lines);
+    mvwchgat(file->win, 0, 0, -1, A_BOLD, 0, NULL);
+    mvwchgat(file->win, 1, 0, -1, A_BOLD, 0, NULL);
     mvwchgat(file->win, file->height - 1, 0, -1, A_UNDERLINE | A_BOLD, 0, NULL);
   }
 
+  ui_highlight();
   ui_refresh();
+
+  int c = 0;
   while ((c = getch())) {
+    ui.start_us = micros();
     switch (c) {
     // TODO: redraw on resize
     case KEY_UP:
@@ -351,6 +394,7 @@ int ui_loop(void) {
     case 'g':
       ui_unhighlight();
       ui.highlighted = 0;
+      ui_highlight();
       break;
     case 'G':
       ui_highlight_prev(ui.line_count);
