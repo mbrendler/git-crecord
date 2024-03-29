@@ -1,8 +1,8 @@
+#include "lib.h"
 #include <git2.h>
 #include <ncurses.h>
 #include <stdlib.h>
 #include <string.h>
-#include "lib.h"
 
 typedef struct UiFile UiFile;
 
@@ -10,10 +10,14 @@ typedef enum {
   selected_not,
   selected_full,
   selected_part,
+  selected_unknown,
 } UiSelected;
 
+#define ui_select_char(selected)                                               \
+  (selected == selected_full ? 'X' : (selected == selected_part ? '~' : ' '))
+
 typedef struct {
-  bool selected;
+  UiSelected selected;
   bool highlighted;
   char origin;     // 'F', 'H', '+', '-', ' '
   unsigned y;      // y position of the line file->win
@@ -138,7 +142,7 @@ void ui_add_line(const git_diff_line *line, const git_diff_delta *delta,
     file->height += height;
   }
   *entry = (UiLine){
-      .selected = line->origin != ' ',
+      .selected = line->origin == ' ' ? selected_not : selected_full,
       .highlighted = ui.line_count == 1,
       .y = y,
       .height = height,
@@ -197,7 +201,7 @@ void ui_update_status_bar(void) {
     return;
   }
   char r_status[available + 1];
-  uint32_t duration = micros() - ui.start_us;
+  const uint32_t duration = micros() - ui.start_us;
   snprintf(r_status, available, "%d/%d %uµs", ui.highlighted + 1, ui.line_count,
            duration);
   mvaddstr(0, COLS - strlen(r_status), r_status);
@@ -312,67 +316,104 @@ void ui_collaps_file(void) {
   }
 }
 
+void ui_update_file_and_hunk_selection_state(void) {
+  const UiFile *file = ui.lines[ui.highlighted].file;
+  UiSelected file_selected = selected_unknown;
+  UiSelected hunk_selected = selected_unknown;
+  for (UiLine *line = file->lines + file->line_count - 1; line > file->lines;
+       line--) {
+    switch (line->origin) {
+    case 'H':
+      line->selected = hunk_selected;
+      mvwaddch(file->win, line->y, ui_line_x_offset(line) + 1,
+               ui_select_char(hunk_selected));
+      hunk_selected = selected_unknown;
+
+      if (file_selected == selected_unknown) {
+        file_selected = line->selected;
+      } else if (file_selected != line->selected) {
+        file_selected = selected_part;
+      }
+      break;
+    case '+':
+    case '-':
+      if (hunk_selected == selected_unknown) {
+        hunk_selected = line->selected;
+      } else if (hunk_selected != line->selected) {
+        hunk_selected = selected_part;
+      }
+      break;
+    default:
+      break;
+    }
+  }
+  file->lines->selected = file_selected;
+  mvwaddch(file->win, 0, 1, ui_select_char(file_selected));
+}
+
 void ui_select(void) {
   UiLine *line = &ui.lines[ui.highlighted];
-  const bool selected = !line->selected;
-  line->selected = selected;
-  const char select_char = selected ? 'X' : ' ';
-  mvwaddch(line->file->win, line->y, ui_line_x_offset(line) + 1, select_char);
+  const UiSelected selected = !line->selected;
+  const char select_char = ui_select_char(selected);
   const UiFile *file = line->file;
 
   if (line->origin == 'F') {
-    for (unsigned i = 0; i < file->line_count; i++) {
-      UiLine *line = &file->lines[i];
+    const UiLine *end = &file->lines[file->line_count];
+    for (; line < end; line++) {
       if (line->origin != ' ') {
         line->selected = selected;
         mvwaddch(file->win, line->y, ui_line_x_offset(line) + 1, select_char);
       }
     }
   } else if (line->origin == 'H') {
-    UiLine *end = &file->lines[file->line_count];
-    for (line++; line < end; line++) {
-      if (line->origin == 'H') {
-        break;
-      }
+    const UiLine *end = &file->lines[file->line_count];
+    for (line++; line < end && line->origin != 'H'; line++) {
       if (line->origin != ' ') {
         line->selected = selected;
         mvwaddch(line->file->win, line->y, ui_line_x_offset(line) + 1,
                  select_char);
       }
     }
-    // TODO: update file line
+    ui_update_file_and_hunk_selection_state();
   } else {
-    // TODO: update hunk and file line
+    line->selected = selected;
+    mvwaddch(file->win, line->y, ui_line_x_offset(line) + 1, select_char);
+    ui_update_file_and_hunk_selection_state();
   }
 }
 
-void ui_select_all(void) {
-  const bool selected = !ui.lines[ui.highlighted].selected;
+void ui_select_toggle_all(void) {
+  const UiSelected selected = !ui.lines[ui.highlighted].selected;
+  const char select_char = ui_select_char(selected);
   for (UiLine *line = ui.lines; line < ui.lines + ui.line_count; line++) {
     if (line->origin != ' ') {
       line->selected = selected;
       mvwaddch(line->file->win, line->y, ui_line_x_offset(line) + 1,
-               selected ? 'X' : ' ');
+               select_char);
     }
   }
 }
 
 int ui_loop(void) {
-  for (UiFile *file = ui.files; file < ui.files + ui.file_count; file++) {
-    int lines = 0;
-    int hunks = 0;
-    for (UiLine *line = file->lines; line < file->lines + file->line_count;
-         line++) {
-      if (line->origin == 'H') {
-        hunks++;
-      } else if (line->origin == '+' || line->origin == '-') {
-        lines++;
+  // post init
+  {
+    for (UiFile *file = ui.files; file < ui.files + ui.file_count; file++) {
+      int lines = 0;
+      int hunks = 0;
+      for (UiLine *line = file->lines; line < file->lines + file->line_count;
+           line++) {
+        if (line->origin == 'H') {
+          hunks++;
+        } else if (line->origin == '+' || line->origin == '-') {
+          lines++;
+        }
       }
+      mvwprintw(file->win, 1, 8, "%d hunks, %d lines", hunks, lines);
+      mvwchgat(file->win, 0, 0, -1, A_BOLD, 0, NULL);
+      mvwchgat(file->win, 1, 0, -1, A_BOLD, 0, NULL);
+      mvwchgat(file->win, file->height - 1, 0, -1, A_UNDERLINE | A_BOLD, 0,
+               NULL);
     }
-    mvwprintw(file->win, 1, 8, "%d hunks, %d lines", hunks, lines);
-    mvwchgat(file->win, 0, 0, -1, A_BOLD, 0, NULL);
-    mvwchgat(file->win, 1, 0, -1, A_BOLD, 0, NULL);
-    mvwchgat(file->win, file->height - 1, 0, -1, A_UNDERLINE | A_BOLD, 0, NULL);
   }
 
   ui_highlight();
@@ -411,7 +452,7 @@ int ui_loop(void) {
       ui_select();
       break;
     case 'A':
-      ui_select_all();
+      ui_select_toggle_all();
       break;
     case 'q':
     case 'c':
