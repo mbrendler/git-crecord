@@ -1,6 +1,5 @@
 #include <git2.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #include "ui.c"
 
@@ -44,52 +43,6 @@ char status_flags_to_char(uint32_t status_flags) {
 }
 
 int status_cb(const char *path, unsigned int status_flags, void *payload) {
-  if (status_flags & GIT_STATUS_IGNORED) {
-    return 0;
-  }
-  const char status = status_flags_to_char(status_flags);
-  printf(" %c %s\n", status, path);
-  return 0;
-}
-
-
-int each_file_cb(const git_diff_delta *delta, float progress, void *payload) {
-  printf("File: %s\n", delta->new_file.path);
-  return 0;
-}
-
-int each_binary_cb(const git_diff_delta *delta, const git_diff_binary *binary,
-                   void *payload) {
-  printf("Binary File: %s\n", delta->new_file.path);
-  return 0;
-}
-
-int each_hunk_cb(const git_diff_delta *delta, const git_diff_hunk *hunk,
-                 void *payload) {
-  printf("Hunk: %d,%d -> %d,%d", hunk->old_start, hunk->old_lines,
-         hunk->new_start, hunk->new_lines);
-  return 0;
-}
-
-int each_line_cb(const git_diff_delta *delta, const git_diff_hunk *hunk,
-                 const git_diff_line *line, void *payload) {
-  printf("Line: %c %d,%d %d,%d %.*s", line->origin, line->old_lineno,
-         line->new_lineno, line->origin, line->num_lines,
-         (int)line->content_len, line->content);
-  return 0;
-}
-
-int print_cb(const git_diff_delta *delta, const git_diff_hunk *hunk,
-             const git_diff_line *line, void *payload) {
-  if (line != NULL) {
-    printf("Line: %c %d,%d %d,%d %.*s", line->origin, line->old_lineno,
-           line->new_lineno, line->origin, line->num_lines,
-           (int)line->content_len, line->content);
-  } else if (hunk != NULL) {
-    printf("Hunk: %d,%d -> %d,%d\n", hunk->old_start, hunk->old_lines,
-           hunk->new_start, hunk->new_lines);
-  } else {
-    printf("Diff: %s\n", delta->new_file.path);
   }
   return 0;
 }
@@ -113,7 +66,7 @@ int diff_build_ui(const git_diff_delta *delta, const git_diff_hunk *hunk,
     char status_char = ' ';
     if (line->origin == 'F') {
       unsigned status = 0;
-      git_status_file(&status, (git_repository*)payload, delta->new_file.path);
+      git_status_file(&status, (git_repository *)payload, delta->new_file.path);
       status_char = status_flags_to_char(status);
     }
     ui_add_line(line, delta, status_char);
@@ -132,8 +85,6 @@ int main(int argc, const char *argv[]) {
 
   git_diff *diff = NULL;
   e(git_diff_index_to_workdir(&diff, repo, NULL, NULL));
-  /* e(git_diff_foreach(diff, each_file_cb, each_binary_cb, each_hunk_cb, */
-  /*                    each_line_cb, NULL)); */
 
   int counts[2] = {0};
   e(git_diff_print(diff, GIT_DIFF_FORMAT_PATCH, diff_count_number_of_lines,
@@ -151,7 +102,6 @@ int main(int argc, const char *argv[]) {
   ui_close();
   printf("You pressed: %d\n", value);
 
-  /* e(git_diff_print(diff, GIT_DIFF_FORMAT_PATCH, print_cb, NULL)); */
 
   git_reference_free(head);
   git_diff_free(diff);

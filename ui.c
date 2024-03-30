@@ -1,8 +1,8 @@
-#include "lib.h"
 #include <git2.h>
 #include <ncurses.h>
-#include <stdlib.h>
 #include <string.h>
+
+#include "lib.h"
 
 typedef struct UiFile UiFile;
 
@@ -342,8 +342,6 @@ void ui_update_file_and_hunk_selection_state(void) {
       } else if (hunk_selected != line->selected) {
         hunk_selected = selected_part;
       }
-      break;
-    default:
       break;
     }
   }
