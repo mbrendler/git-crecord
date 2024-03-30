@@ -81,10 +81,8 @@ void ui_init(const char *title, int line_count, int file_count, bool warn) {
   ui.title = title;
   ui.status_bar_color = warn ? color_status_bar_warn : color_status_bar;
   ui.start_us = micros();
-  /* ui.line_count = line_count; */
   ui.lines = malloc(sizeof(*(ui.lines)) * line_count);
   ui.files = malloc(sizeof(*(ui.files)) * file_count);
-  /* ui.win = newpad(100, COLS); */
   initscr();
   keypad(stdscr, TRUE);
   ui_init_colors();
@@ -96,6 +94,9 @@ void ui_close(void) {
   for (unsigned i = 0; i < ui.file_count; i++) {
     delwin(ui.files[i].win);
   }
+}
+
+void ui_free(void) {
   free(ui.lines);
   free(ui.files);
   ui = (Ui){
@@ -452,9 +453,10 @@ int ui_loop(void) {
     case 'A':
       ui_select_toggle_all();
       break;
-    case 'q':
     case 'c':
     case 's':
+    case 'P':
+    case 'q':
       return c;
     }
     ui_refresh();
