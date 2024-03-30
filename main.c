@@ -168,7 +168,10 @@ int main(int argc, const char *argv[]) {
     DiffPrintPayload payload = {0, false, stage_command_stream};
     e(git_diff_print(diff, GIT_DIFF_FORMAT_PATCH, diff_print, &payload));
     fflush(stage_command_stream);
-    pclose(stage_command_stream);
+    const int return_code = pclose(stage_command_stream);
+    if (return_code) {
+      exit(return_code);
+    }
     break;
   }
   }
