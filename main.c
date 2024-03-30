@@ -1,5 +1,6 @@
 #include <git2.h>
 #include <stdio.h>
+#include <unistd.h>
 
 #include "ui.c"
 
@@ -43,6 +44,9 @@ char status_flags_to_char(uint32_t status_flags) {
 }
 
 int status_cb(const char *path, unsigned int status_flags, void *payload) {
+  if (0 == (status_flags & GIT_STATUS_IGNORED)) {
+    const char status = status_flags_to_char(status_flags);
+    printf(" %c %s\n", status, path);
   }
   return 0;
 }
@@ -74,6 +78,57 @@ int diff_build_ui(const git_diff_delta *delta, const git_diff_hunk *hunk,
   return 0;
 }
 
+typedef struct {
+  unsigned line_index;
+  bool hunk_selected;
+  FILE *stream;
+} DiffPrintPayload;
+
+int diff_print(const git_diff_delta *delta, const git_diff_hunk *hunk,
+               const git_diff_line *line, void *payload) {
+  DiffPrintPayload *diff_print_payload = payload;
+  FILE *stream = diff_print_payload->stream;
+  const UiLine *ui_line = ui.lines + diff_print_payload->line_index;
+  if (line->origin == 'H') {
+    diff_print_payload->hunk_selected = !!ui_line->selected;
+    if (ui_line->selected) {
+      const UiFile *file = ui_line->file;
+      const UiLine *end = file->lines + file->line_count;
+      int new_lines = hunk->new_lines;
+      for (const UiLine *line_r = ui_line + 1; line_r < end; line_r++) {
+        if (line_r->origin == 'H') {
+          break;
+        }
+        if (!line_r->selected) {
+          if (line_r->origin == '+') {
+            new_lines--;
+          } else if (line_r->origin == '-') {
+            new_lines++;
+          }
+        }
+      }
+      fprintf(stream, "@@ -%d,%d +%d,%d @@\n", hunk->old_start, hunk->old_lines,
+              hunk->new_start, new_lines);
+    }
+  } else {
+    if (ui_line->selected ||
+        (line->origin == ' ' && diff_print_payload->hunk_selected)) {
+      if (line->origin != 'F') {
+        fputc(line->origin, stream);
+      }
+      fwrite(line->content, sizeof(*line->content), line->content_len, stream);
+    } else if (line->origin == '-') {
+      if (diff_print_payload->hunk_selected) {
+        fputc(' ', stream);
+        fwrite(line->content, sizeof(*line->content), line->content_len,
+               stream);
+      }
+    }
+  }
+  diff_print_payload->line_index++;
+  return 0;
+}
+
 int main(int argc, const char *argv[]) {
   atexit(ui_close);
 
@@ -98,16 +153,37 @@ int main(int argc, const char *argv[]) {
 
   e(git_diff_print(diff, GIT_DIFF_FORMAT_PATCH, diff_build_ui, repo));
 
-  const int value = ui_loop();
+  const int ui_result_value = ui_loop();
   ui_close();
-  printf("You pressed: %d\n", value);
+  switch (ui_result_value) {
+  case 'P': {
+    DiffPrintPayload payload = {0, false, stdout};
+    e(git_diff_print(diff, GIT_DIFF_FORMAT_PATCH, diff_print, &payload));
+    break;
+  }
+  case 's':
+  case 'c': {
+    FILE *stage_command_stream =
+        popen("git apply --cached --unidiff-zero -", "w");
+    DiffPrintPayload payload = {0, false, stage_command_stream};
+    e(git_diff_print(diff, GIT_DIFF_FORMAT_PATCH, diff_print, &payload));
+    fflush(stage_command_stream);
+    pclose(stage_command_stream);
+    break;
+  }
+  }
 
+  ui_free();
 
   git_reference_free(head);
   git_diff_free(diff);
 
   git_repository_free(repo);
   git_libgit2_shutdown();
+
+  if ('c' == ui_result_value) {
+    execlp("git", "git", "commit", NULL);
+  }
 
   return 0;
 }

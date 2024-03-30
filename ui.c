@@ -54,7 +54,7 @@ typedef struct {
   UiFile *files;
 } Ui;
 
-static Ui ui = {
+Ui ui = {
     .scroll_offset = 0,
     .highlighted = 0,
     .status_bar_color = color_status_bar,
