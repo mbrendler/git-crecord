@@ -8,4 +8,3 @@ cc -g -std=c2x -Werror -Wall -Wpedantic -O3 -o git-crecord \
   main.c \
   -lgit2 \
   -lncurses
-
