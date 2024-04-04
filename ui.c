@@ -7,19 +7,18 @@
 typedef struct UiFile UiFile;
 
 typedef enum {
-  selected_not,
-  selected_full,
-  selected_part,
-  selected_unknown,
+  selected_not = 0,
+  selected_full = 1,
+  selected_part = 2,
+  selected_unknown = 3,
 } UiSelected;
 
-#define ui_select_char(selected)                                               \
-  (selected == selected_full ? 'X' : (selected == selected_part ? '~' : ' '))
+static const char ui_select_char[selected_unknown + 1] = {' ', 'X', '~', ' '};
 
 typedef struct {
   UiSelected selected;
   bool highlighted;
-  char origin;     // 'F', 'H', '+', '-', ' '
+  char origin;     // 'F', 'H', '+', '-', ' ', 'B'
   unsigned y;      // y position of the line file->win
   unsigned height; // number of displayed lines
   UiFile *file;
@@ -157,8 +156,10 @@ void ui_add_line(const git_diff_line *line, const git_diff_delta *delta,
   // TODO: wrap lines
   wresize(file->win, file->height, COLS);
   const char *selected = entry->selected ? "[X]  " : "[ ]  ";
-  mvwaddstr(file->win, y, ui_line_x_offset(line),
-            line->origin == ' ' ? "     " : selected);
+  mvwaddstr(
+      file->win, y, ui_line_x_offset(line),
+      line->origin == ' ' ? "     " : selected
+  );
   if ('F' == line->origin) {
     waddch(file->win, status);
     waddch(file->win, ' ');
@@ -329,8 +330,10 @@ void ui_update_file_and_hunk_selection_state(void) {
     switch (line->origin) {
     case 'H':
       line->selected = hunk_selected;
-      mvwaddch(file->win, line->y, ui_line_x_offset(line) + 1,
-               ui_select_char(hunk_selected));
+      mvwaddch(
+          file->win, line->y, ui_line_x_offset(line) + 1,
+          ui_select_char[hunk_selected]
+      );
       hunk_selected = selected_unknown;
 
       if (file_selected == selected_unknown) {
@@ -350,13 +353,13 @@ void ui_update_file_and_hunk_selection_state(void) {
     }
   }
   file->lines->selected = file_selected;
-  mvwaddch(file->win, 0, 1, ui_select_char(file_selected));
+  mvwaddch(file->win, 0, 1, ui_select_char[file_selected]);
 }
 
 void ui_select(void) {
   UiLine *line = &ui.lines[ui.highlighted];
   const UiSelected selected = !line->selected;
-  const char select_char = ui_select_char(selected);
+  const char select_char = ui_select_char[selected];
   const UiFile *file = line->file;
 
   if (line->origin == 'F') {
@@ -386,7 +389,7 @@ void ui_select(void) {
 
 void ui_select_toggle_all(void) {
   const UiSelected selected = !ui.lines[ui.highlighted].selected;
-  const char select_char = ui_select_char(selected);
+  const char select_char = ui_select_char[selected];
   for (UiLine *line = ui.lines; line < ui.lines + ui.line_count; line++) {
     if (line->origin != ' ') {
       line->selected = selected;
