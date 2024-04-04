@@ -40,7 +40,9 @@ const int GIT_STATUS_INDEX_KNOWN_MASK =
 // GIT_STATUS_WT_RENAMED        R
 // GIT_STATUS_IGNORED           I
 
-char status_flags_to_char(uint32_t status_flags) {
+char file_status_char(git_repository *repo, const char *path) {
+  unsigned status_flags = 0;
+  git_status_file(&status_flags, repo, path);
   if (status_flags & GIT_STATUS_WT_NEW) {
     if (status_flags & GIT_STATUS_INDEX_KNOWN_MASK) {
       return 'A';
@@ -51,20 +53,6 @@ char status_flags_to_char(uint32_t status_flags) {
     return 'M';
   }
   return ' ';
-}
-
-char file_status_char(git_repository *repo, const char *path) {
-  unsigned status = 0;
-  git_status_file(&status, repo, path);
-  return status_flags_to_char(status);
-}
-
-int status_cb(const char *path, unsigned int status_flags, void *payload) {
-  if (0 == (status_flags & GIT_STATUS_IGNORED)) {
-    const char status = status_flags_to_char(status_flags);
-    printf(" %c %s\n", status, path);
-  }
-  return 0;
 }
 
 int diff_count_number_of_lines(
@@ -175,8 +163,6 @@ int main(int argc, char *argv[]) {
 
   git_libgit2_init();
   e(git_repository_open_ext(&program.repo, ".", 0, NULL));
-
-  e(git_status_foreach(program.repo, status_cb, NULL));
 
   git_diff_options diff_options = GIT_DIFF_OPTIONS_INIT;
 
