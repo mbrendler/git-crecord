@@ -94,6 +94,25 @@ int diff_build_ui(
   return 0;
 }
 
+int count_new_lines_of_hunk(const UiLine *line, const git_diff_hunk *hunk) {
+  const UiFile *file = line->file;
+  const UiLine *end = file->lines + file->line_count;
+  int new_lines = hunk->new_lines;
+  for (line++; line < end; line++) {
+    if (line->origin == 'H') {
+      break;
+    }
+    if (!line->selected) {
+      if (line->origin == '+') {
+        new_lines--;
+      } else if (line->origin == '-') {
+        new_lines++;
+      }
+    }
+  }
+  return new_lines;
+}
+
 typedef struct {
   unsigned line_index;
   bool hunk_selected;
@@ -118,40 +137,23 @@ int diff_print(
   if (line->origin == 'H') {
     diff_print_payload->hunk_selected = !!ui_line->selected;
     if (ui_line->selected) {
-      const UiFile *file = ui_line->file;
-      const UiLine *end = file->lines + file->line_count;
-      int new_lines = hunk->new_lines;
-      for (const UiLine *line_r = ui_line + 1; line_r < end; line_r++) {
-        if (line_r->origin == 'H') {
-          break;
-        }
-        if (!line_r->selected) {
-          if (line_r->origin == '+') {
-            new_lines--;
-          } else if (line_r->origin == '-') {
-            new_lines++;
-          }
-        }
-      }
+      const int new_lines = count_new_lines_of_hunk(ui_line, hunk);
       fprintf(
           stream, "@@ -%d,%d +%d,%d @@\n", hunk->old_start, hunk->old_lines,
           hunk->new_start, new_lines
       );
     }
-  } else {
-    if (ui_line->selected ||
-        (line->origin == ' ' && diff_print_payload->hunk_selected)) {
-      if (line->origin != 'F') {
-        fputc(line->origin, stream);
-      }
+  } else if (line->origin == 'F') {
+    if (ui_line->selected) {
+      fwrite(line->content, sizeof(*line->content), line->content_len, stream);
+    }
+  } else if (diff_print_payload->hunk_selected) {
+    if (ui_line->selected || line->origin == ' ') {
+      fputc(line->origin, stream);
       fwrite(line->content, sizeof(*line->content), line->content_len, stream);
     } else if (line->origin == '-') {
-      if (diff_print_payload->hunk_selected) {
-        fputc(' ', stream);
-        fwrite(
-            line->content, sizeof(*line->content), line->content_len, stream
-        );
-      }
+      fputc(' ', stream);
+      fwrite(line->content, sizeof(*line->content), line->content_len, stream);
     }
   }
   diff_print_payload->line_index++;
