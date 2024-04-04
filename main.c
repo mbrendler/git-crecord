@@ -53,6 +53,12 @@ char status_flags_to_char(uint32_t status_flags) {
   return ' ';
 }
 
+char file_status_char(git_repository *repo, const char *path) {
+  unsigned status = 0;
+  git_status_file(&status, repo, path);
+  return status_flags_to_char(status);
+}
+
 int status_cb(const char *path, unsigned int status_flags, void *payload) {
   if (0 == (status_flags & GIT_STATUS_IGNORED)) {
     const char status = status_flags_to_char(status_flags);
@@ -81,16 +87,13 @@ int diff_build_ui(
 ) {
   Program *program = payload;
   if (line) {
-    char status_char = ' ';
     if (line->origin == 'F') {
-      unsigned status = 0;
-      git_status_file(&status, program->repo, delta->new_file.path);
-      status_char = status_flags_to_char(status);
-      program->last_file_status = status_char;
+      program->last_file_status =
+          file_status_char(program->repo, delta->new_file.path);
     }
     if ((program->only_untracked && program->last_file_status == '?') ||
         (!program->only_untracked && program->last_file_status != '?')) {
-      ui_add_line(line, delta, status_char);
+      ui_add_line(line, delta, program->last_file_status);
     }
   }
   return 0;
@@ -99,8 +102,6 @@ int diff_build_ui(
 typedef struct {
   unsigned line_index;
   bool hunk_selected;
-  bool only_untracked;
-  char last_file_status;
   Program *program;
   FILE *stream;
 } DiffPrintPayload;
@@ -110,24 +111,20 @@ int diff_print(
     const git_diff_line *line, void *payload
 ) {
   DiffPrintPayload *diff_print_payload = payload;
+  Program *program = diff_print_payload->program;
+
+  if (line->origin == 'F') {
+    program->last_file_status =
+        file_status_char(program->repo, delta->new_file.path);
+  }
+  if ((program->only_untracked && program->last_file_status != '?') ||
+      (!program->only_untracked && program->last_file_status == '?')) {
+    return 0;
+  }
+
   FILE *stream = diff_print_payload->stream;
   const UiLine *ui_line = ui.lines + diff_print_payload->line_index;
   const UiFile *file = ui_line->file;
-
-  if (line->origin == 'F') {
-    unsigned status = 0;
-    git_status_file(
-        &status, diff_print_payload->program->repo, delta->new_file.path
-    );
-    const char status_char = status_flags_to_char(status);
-    diff_print_payload->last_file_status = status_char;
-  }
-  if ((diff_print_payload->only_untracked &&
-       diff_print_payload->last_file_status != '?') ||
-      (!diff_print_payload->only_untracked &&
-       diff_print_payload->last_file_status == '?')) {
-    return 0;
-  }
   if (line->origin == 'H') {
     diff_print_payload->hunk_selected = !!ui_line->selected;
     if (ui_line->selected) {
@@ -217,11 +214,12 @@ int main(int argc, char *argv[]) {
   ui_close();
   switch (ui_result_value) {
   case 'P': {
-    DiffPrintPayload payload = {0, false, false, ' ', &program, stdout};
+    program.only_untracked = false;
+    DiffPrintPayload payload = {0, false, &program, stdout};
     e(git_diff_print(program.diff, GIT_DIFF_FORMAT_PATCH, diff_print, &payload)
     );
     if (options.untracked_files) {
-      payload.only_untracked = true;
+      program.only_untracked = true;
       e(git_diff_print(
           program.diff, GIT_DIFF_FORMAT_PATCH, diff_print, &payload
       ));
@@ -232,12 +230,12 @@ int main(int argc, char *argv[]) {
   case 'c': {
     FILE *stage_command_stream =
         popen("git apply --cached --unidiff-zero -", "w");
-    DiffPrintPayload payload = {0,   false,    false,
-                                ' ', &program, stage_command_stream};
+    program.only_untracked = false;
+    DiffPrintPayload payload = {0, false, &program, stage_command_stream};
     e(git_diff_print(program.diff, GIT_DIFF_FORMAT_PATCH, diff_print, &payload)
     );
     if (options.untracked_files) {
-      payload.only_untracked = true;
+      program.only_untracked = true;
       e(git_diff_print(
           program.diff, GIT_DIFF_FORMAT_PATCH, diff_print, &payload
       ));
