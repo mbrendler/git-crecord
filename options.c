@@ -9,10 +9,11 @@ typedef struct {
 
 static Options options = {.untracked_files = false, .reverse = false};
 
-static struct option long_options[] = {{"untracked", no_argument, 0, 'u'},
-                                       {"reverse", no_argument, 0, 'R'},
-                                       {"help", no_argument, 0, 'h'},
-                                       {0, 0, 0, 0}};
+static struct option long_options[] = {
+    {"untracked", no_argument, 0, 'u'},
+    {"reverse", no_argument, 0, 'R'},
+    {"help", no_argument, 0, 'h'},
+    {0, 0, 0, 0}};
 
 static void options_print_help() {
   puts("usage: git crecord [<options>]");
@@ -44,8 +45,8 @@ static void options_print_help() {
 Options options_parse(int argc, char *argv[]) {
   int c;
   int option_index = 0;
-  while (-1 !=
-         (c = getopt_long(argc, argv, "uRh", long_options, &option_index))) {
+  while (-1 != (c = getopt_long(argc, argv, "uRh", long_options, &option_index))
+  ) {
     switch (c) {
     case 'u':
       options.untracked_files = true;

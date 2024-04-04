@@ -77,7 +77,9 @@ void ui_init_colors(void) {
   init_pair(color_status_bar_warn, COLOR_BLACK, COLOR_RED);
 }
 
-void ui_init(const char *title, int line_count, int file_count, bool warn) {
+void ui_init(
+    const char *title, unsigned line_count, unsigned file_count, bool warn
+) {
   ui.title = title;
   ui.status_bar_color = warn ? color_status_bar_warn : color_status_bar;
   ui.start_us = micros();
@@ -100,13 +102,14 @@ void ui_free(void) {
   free(ui.lines);
   free(ui.files);
   ui = (Ui){
-      .line_count = 0,
-      .file_count = 0,
       .scroll_offset = 0,
       .highlighted = 0,
+      .status_bar_color = color_status_bar,
       .title = "",
       .start_us = 0,
+      .line_count = 0,
       .lines = NULL,
+      .file_count = 0,
       .files = NULL,
   };
 }
@@ -117,8 +120,9 @@ void ui_free(void) {
 #define ui_line_color(line)                                                    \
   (line->origin == '+' ? color_green : (line->origin == '-' ? color_red : 0))
 
-void ui_add_line(const git_diff_line *line, const git_diff_delta *delta,
-                 char status) {
+void ui_add_line(
+    const git_diff_line *line, const git_diff_delta *delta, char status
+) {
   unsigned height = 1;
   unsigned y = 0;
   UiLine *entry = &ui.lines[ui.line_count];
@@ -143,9 +147,9 @@ void ui_add_line(const git_diff_line *line, const git_diff_delta *delta,
     file->line_count++;
     file->height += height;
   }
-  const bool not_select = line->origin == ' ' || file->status == '?';
+  const bool select = line->origin != ' ' && file->status != '?';
   *entry = (UiLine){
-      .selected = not_select ? selected_not : selected_full,
+      .selected = select ? selected_full : selected_not,
       .highlighted = ui.line_count == 1,
       .y = y,
       .height = height,
@@ -170,8 +174,10 @@ void ui_add_line(const git_diff_line *line, const git_diff_delta *delta,
   } else {
     waddch(file->win, line->origin);
     waddnstr(file->win, line->content, line->content_len);
-    mvwchgat(file->win, y, ui_line_x_offset(line) + 4, -1, 0,
-             ui_line_color(line), NULL);
+    mvwchgat(
+        file->win, y, ui_line_x_offset(line) + 4, -1, 0, ui_line_color(line),
+        NULL
+    );
   }
 }
 
@@ -207,8 +213,10 @@ void ui_update_status_bar(void) {
   }
   char r_status[available + 1];
   const uint32_t duration = micros() - ui.start_us;
-  snprintf(r_status, available, "%d/%d %uµs", ui.highlighted + 1, ui.line_count,
-           duration);
+  snprintf(
+      r_status, available, "%d/%d %uµs", ui.highlighted + 1, ui.line_count,
+      duration
+  );
   mvaddstr(0, COLS - strlen(r_status), r_status);
   mvchgat(0, 0, -1, A_BOLD, ui.status_bar_color, NULL);
 }
@@ -375,8 +383,9 @@ void ui_select(void) {
     for (line++; line < end && line->origin != 'H'; line++) {
       if (line->origin != ' ') {
         line->selected = selected;
-        mvwaddch(line->file->win, line->y, ui_line_x_offset(line) + 1,
-                 select_char);
+        mvwaddch(
+            line->file->win, line->y, ui_line_x_offset(line) + 1, select_char
+        );
       }
     }
     ui_update_file_and_hunk_selection_state();
@@ -393,8 +402,9 @@ void ui_select_toggle_all(void) {
   for (UiLine *line = ui.lines; line < ui.lines + ui.line_count; line++) {
     if (line->origin != ' ') {
       line->selected = selected;
-      mvwaddch(line->file->win, line->y, ui_line_x_offset(line) + 1,
-               select_char);
+      mvwaddch(
+          line->file->win, line->y, ui_line_x_offset(line) + 1, select_char
+      );
     }
   }
 }
@@ -413,11 +423,12 @@ int ui_loop(void) {
           lines++;
         }
       }
-      mvwprintw(file->win, 1, 8, "%d hunks, %d lines", hunks, lines);
+      mvwprintw(file->win, 1, 8, "%d hunks, %d lines changed", hunks, lines);
       mvwchgat(file->win, 0, 0, -1, A_BOLD, 0, NULL);
       mvwchgat(file->win, 1, 0, -1, A_BOLD, 0, NULL);
-      mvwchgat(file->win, file->height - 1, 0, -1, A_UNDERLINE | A_BOLD, 0,
-               NULL);
+      mvwchgat(
+          file->win, file->height - 1, 0, -1, A_UNDERLINE | A_BOLD, 0, NULL
+      );
     }
   }
 

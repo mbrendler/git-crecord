@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "ui.c"
 #include "options.c"
+#include "ui.c"
 
 void e(int error) {
   if (error < 0) {
@@ -61,9 +61,10 @@ int status_cb(const char *path, unsigned int status_flags, void *payload) {
   return 0;
 }
 
-int diff_count_number_of_lines(const git_diff_delta *delta,
-                               const git_diff_hunk *hunk,
-                               const git_diff_line *line, void *payload) {
+int diff_count_number_of_lines(
+    const git_diff_delta *delta, const git_diff_hunk *hunk,
+    const git_diff_line *line, void *payload
+) {
   Program *program = payload;
   if (line) {
     program->line_count++;
@@ -74,8 +75,10 @@ int diff_count_number_of_lines(const git_diff_delta *delta,
   return 0;
 }
 
-int diff_build_ui(const git_diff_delta *delta, const git_diff_hunk *hunk,
-                  const git_diff_line *line, void *payload) {
+int diff_build_ui(
+    const git_diff_delta *delta, const git_diff_hunk *hunk,
+    const git_diff_line *line, void *payload
+) {
   Program *program = payload;
   if (line) {
     char status_char = ' ';
@@ -86,8 +89,7 @@ int diff_build_ui(const git_diff_delta *delta, const git_diff_hunk *hunk,
       program->last_file_status = status_char;
     }
     if ((program->only_untracked && program->last_file_status == '?') ||
-        (!program->only_untracked && program->last_file_status != '?')
-    ) {
+        (!program->only_untracked && program->last_file_status != '?')) {
       ui_add_line(line, delta, status_char);
     }
   }
@@ -103,8 +105,10 @@ typedef struct {
   FILE *stream;
 } DiffPrintPayload;
 
-int diff_print(const git_diff_delta *delta, const git_diff_hunk *hunk,
-               const git_diff_line *line, void *payload) {
+int diff_print(
+    const git_diff_delta *delta, const git_diff_hunk *hunk,
+    const git_diff_line *line, void *payload
+) {
   DiffPrintPayload *diff_print_payload = payload;
   FILE *stream = diff_print_payload->stream;
   const UiLine *ui_line = ui.lines + diff_print_payload->line_index;
@@ -112,12 +116,16 @@ int diff_print(const git_diff_delta *delta, const git_diff_hunk *hunk,
 
   if (line->origin == 'F') {
     unsigned status = 0;
-    git_status_file(&status, diff_print_payload->program->repo, delta->new_file.path);
+    git_status_file(
+        &status, diff_print_payload->program->repo, delta->new_file.path
+    );
     const char status_char = status_flags_to_char(status);
     diff_print_payload->last_file_status = status_char;
   }
-  if ((diff_print_payload->only_untracked && diff_print_payload->last_file_status != '?') ||
-      (!diff_print_payload->only_untracked && diff_print_payload->last_file_status == '?')) {
+  if ((diff_print_payload->only_untracked &&
+       diff_print_payload->last_file_status != '?') ||
+      (!diff_print_payload->only_untracked &&
+       diff_print_payload->last_file_status == '?')) {
     return 0;
   }
   if (line->origin == 'H') {
@@ -137,8 +145,10 @@ int diff_print(const git_diff_delta *delta, const git_diff_hunk *hunk,
           }
         }
       }
-      fprintf(stream, "@@ -%d,%d +%d,%d @@\n", hunk->old_start, hunk->old_lines,
-              hunk->new_start, new_lines);
+      fprintf(
+          stream, "@@ -%d,%d +%d,%d @@\n", hunk->old_start, hunk->old_lines,
+          hunk->new_start, new_lines
+      );
     }
   } else {
     if (ui_line->selected ||
@@ -150,8 +160,9 @@ int diff_print(const git_diff_delta *delta, const git_diff_hunk *hunk,
     } else if (line->origin == '-') {
       if (diff_print_payload->hunk_selected) {
         fputc(' ', stream);
-        fwrite(line->content, sizeof(*line->content), line->content_len,
-               stream);
+        fwrite(
+            line->content, sizeof(*line->content), line->content_len, stream
+        );
       }
     }
   }
@@ -177,22 +188,29 @@ int main(int argc, char *argv[]) {
                           GIT_DIFF_RECURSE_UNTRACKED_DIRS |
                           GIT_DIFF_SHOW_UNTRACKED_CONTENT;
   }
-  e(git_diff_index_to_workdir(&program.diff, program.repo, NULL, &diff_options));
+  e(git_diff_index_to_workdir(&program.diff, program.repo, NULL, &diff_options)
+  );
 
-  e(git_diff_print(program.diff, GIT_DIFF_FORMAT_PATCH, diff_count_number_of_lines,
-                   &program));
+  e(git_diff_print(
+      program.diff, GIT_DIFF_FORMAT_PATCH, diff_count_number_of_lines, &program
+  ));
 
   git_reference *head = NULL;
   e(git_repository_head(&head, program.repo));
   const char *branch = git_reference_shorthand(head);
-  ui_init(branch, program.line_count, program.file_count,
-          strcmp(branch, "main") == 0 || strcmp(branch, "master") == 0);
+  ui_init(
+      branch, program.line_count, program.file_count,
+      strcmp(branch, "main") == 0 || strcmp(branch, "master") == 0
+  );
 
   program.only_untracked = false;
-  e(git_diff_print(program.diff, GIT_DIFF_FORMAT_PATCH, diff_build_ui, &program));
+  e(git_diff_print(program.diff, GIT_DIFF_FORMAT_PATCH, diff_build_ui, &program)
+  );
   if (options.untracked_files) {
     program.only_untracked = true;
-    e(git_diff_print(program.diff, GIT_DIFF_FORMAT_PATCH, diff_build_ui, &program));
+    e(git_diff_print(
+        program.diff, GIT_DIFF_FORMAT_PATCH, diff_build_ui, &program
+    ));
   }
 
   const int ui_result_value = ui_loop();
@@ -200,10 +218,13 @@ int main(int argc, char *argv[]) {
   switch (ui_result_value) {
   case 'P': {
     DiffPrintPayload payload = {0, false, false, ' ', &program, stdout};
-    e(git_diff_print(program.diff, GIT_DIFF_FORMAT_PATCH, diff_print, &payload));
+    e(git_diff_print(program.diff, GIT_DIFF_FORMAT_PATCH, diff_print, &payload)
+    );
     if (options.untracked_files) {
       payload.only_untracked = true;
-      e(git_diff_print(program.diff, GIT_DIFF_FORMAT_PATCH, diff_print, &payload));
+      e(git_diff_print(
+          program.diff, GIT_DIFF_FORMAT_PATCH, diff_print, &payload
+      ));
     }
     break;
   }
@@ -211,11 +232,15 @@ int main(int argc, char *argv[]) {
   case 'c': {
     FILE *stage_command_stream =
         popen("git apply --cached --unidiff-zero -", "w");
-    DiffPrintPayload payload = {0, false, false, ' ', &program, stage_command_stream};
-    e(git_diff_print(program.diff, GIT_DIFF_FORMAT_PATCH, diff_print, &payload));
+    DiffPrintPayload payload = {0,   false,    false,
+                                ' ', &program, stage_command_stream};
+    e(git_diff_print(program.diff, GIT_DIFF_FORMAT_PATCH, diff_print, &payload)
+    );
     if (options.untracked_files) {
       payload.only_untracked = true;
-      e(git_diff_print(program.diff, GIT_DIFF_FORMAT_PATCH, diff_print, &payload));
+      e(git_diff_print(
+          program.diff, GIT_DIFF_FORMAT_PATCH, diff_print, &payload
+      ));
     }
     fflush(stage_command_stream);
     const int return_code = pclose(stage_command_stream);
