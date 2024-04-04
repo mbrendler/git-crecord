@@ -183,6 +183,11 @@ int main(int argc, char *argv[]) {
       program.diff, GIT_DIFF_FORMAT_PATCH, diff_count_number_of_lines, &program
   ));
 
+  if (program.line_count == 0) {
+    puts("No changes.");
+    return 0;
+  }
+
   git_reference *head = NULL;
   e(git_repository_head(&head, program.repo));
   const char *branch = git_reference_shorthand(head);
