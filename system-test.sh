@@ -45,7 +45,7 @@ function run-git-crecord-reverse() {
 
 readonly HERE="$(dirname "$(readlink -m "${BASH_SOURCE[0]}")")"
 readonly TEST_DIR=$HERE/tmp/__test__
-readonly EXECUTABLE=$HERE/bin/git-crecord
+readonly EXECUTABLE=$HERE/git-crecord
 readonly REPO_DIR=$TEST_DIR/repo
 
 rm -rf "$TEST_DIR"
