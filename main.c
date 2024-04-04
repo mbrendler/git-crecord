@@ -263,29 +263,3 @@ int main(int argc, char *argv[]) {
 
   return 0;
 }
-
-/* 'cre' is aliased to 'crecord' */
-/* usage: git crecord [<options>] */
-/*  */
-/*   -u, --untracked-files  -- show untracked files */
-/*   -R, --reverse          -- unstage hunks */
-/*   --version              -- show version information */
-/*   -h                     -- this help message */
-/*  */
-/*   in-program commands: */
-/*     q      - quit */
-/*     s      - stage selection and quit */
-/*     c      - commit selection and quit */
-/*     j / ↓  - down */
-/*     k / ↑  - up */
-/*     h / ←  - collapse fold */
-/*     l / →  - expand fold */
-/*     f      - toggle fold */
-/*     g      - go to first line */
-/*     G      - go to last line */
-/*     C-P    - up to previous hunk / file */
-/*     C-N    - down to next hunk / file */
-/*     SPACE  - toggle selection */
-/*     A      - toggle all selections */
-/*     ?      - display help */
-/*     R      - force redraw */
