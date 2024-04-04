@@ -73,20 +73,23 @@ typedef struct {
   Program *program;
 } FileSelectionPayload;
 
+bool ignore_diff_line(
+    const char *file, const git_diff_line *line, FileSelectionPayload *context
+) {
+  if (line->origin == 'F') {
+    context->last_file_status = file_status_char(context->program->repo, file);
+  }
+  return (context->only_untracked && context->last_file_status != '?') ||
+         (!context->only_untracked && context->last_file_status == '?');
+}
+
 int diff_build_ui(
     const git_diff_delta *delta, const git_diff_hunk *hunk,
     const git_diff_line *line, void *payload
 ) {
   FileSelectionPayload *context = payload;
-  if (line) {
-    if (line->origin == 'F') {
-      context->last_file_status =
-          file_status_char(context->program->repo, delta->new_file.path);
-    }
-    if ((context->only_untracked && context->last_file_status == '?') ||
-        (!context->only_untracked && context->last_file_status != '?')) {
-      ui_add_line(line, delta, context->last_file_status);
-    }
+  if (!ignore_diff_line(delta->new_file.path, line, payload)) {
+    ui_add_line(line, delta, context->last_file_status);
   }
   return 0;
 }
@@ -104,18 +107,10 @@ int diff_print(
 ) {
   DiffPrintPayload *diff_print_payload = payload;
 
-  {
-    FileSelectionPayload *file_selection = &diff_print_payload->file_selection;
-    if (line->origin == 'F') {
-      file_selection->last_file_status =
-          file_status_char(file_selection->program->repo, delta->new_file.path);
-    }
-    if ((file_selection->only_untracked &&
-         file_selection->last_file_status != '?') ||
-        (!file_selection->only_untracked &&
-         file_selection->last_file_status == '?')) {
-      return 0;
-    }
+  if (ignore_diff_line(
+          delta->new_file.path, line, &diff_print_payload->file_selection
+      )) {
+    return 0;
   }
 
   FILE *stream = diff_print_payload->stream;
