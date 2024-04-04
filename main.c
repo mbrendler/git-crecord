@@ -169,6 +169,11 @@ int main(int argc, char *argv[]) {
   git_libgit2_init();
   e(git_repository_open_ext(&program.repo, ".", 0, NULL));
 
+  if (chdir(git_repository_workdir(program.repo))) {
+    perror("chdir");
+    exit(1);
+  }
+
   git_diff_options diff_options = GIT_DIFF_OPTIONS_INIT;
 
   if (options.untracked_files) {
