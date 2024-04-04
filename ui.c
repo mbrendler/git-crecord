@@ -28,6 +28,7 @@ typedef struct {
 typedef struct UiFile {
   bool expanded;
   unsigned height;
+  char status;
   unsigned line_count;
   UiLine *lines;
   WINDOW *win;
@@ -132,6 +133,7 @@ void ui_add_line(const git_diff_line *line, const git_diff_delta *delta,
     *file = (UiFile){
         .height = height + 1,
         .expanded = false,
+        .status = status,
         .lines = entry,
         .line_count = 1,
         .win = newpad(1, COLS),
@@ -142,8 +144,9 @@ void ui_add_line(const git_diff_line *line, const git_diff_delta *delta,
     file->line_count++;
     file->height += height;
   }
+  const bool not_select = line->origin == ' ' || file->status == '?';
   *entry = (UiLine){
-      .selected = line->origin == ' ' ? selected_not : selected_full,
+      .selected = not_select ? selected_not : selected_full,
       .highlighted = ui.line_count == 1,
       .y = y,
       .height = height,
