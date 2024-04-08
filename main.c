@@ -5,13 +5,12 @@
 #include "options.c"
 #include "ui.c"
 
-void e(int error) {
-  if (error < 0) {
-    const git_error *e = git_error_last();
-    printf("Error %d/%d: %s\n", error, e->klass, e->message);
-    exit(error);
+#define e(error)                                                               \
+  if (error < 0) {                                                             \
+    const git_error *e = git_error_last();                                     \
+    printf("%d: Error %d/%d: %s\n", __LINE__, error, e->klass, e->message);    \
+    exit(error);                                                               \
   }
-}
 
 typedef struct {
   git_repository *repo;
