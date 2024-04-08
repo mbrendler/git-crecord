@@ -47,6 +47,7 @@ typedef struct {
   unsigned highlighted;
   UiColor status_bar_color;
   const char *title;
+  bool reverse;
   uint64_t start_us;
   unsigned line_count;
   UiLine *lines;
@@ -54,17 +55,7 @@ typedef struct {
   UiFile *files;
 } Ui;
 
-Ui ui = {
-    .scroll_offset = 0,
-    .highlighted = 0,
-    .status_bar_color = color_status_bar,
-    .title = "",
-    .start_us = 0,
-    .line_count = 0,
-    .lines = NULL,
-    .file_count = 0,
-    .files = NULL,
-};
+Ui ui = {0};
 
 void ui_init_colors(void) {
   start_color();
@@ -78,9 +69,11 @@ void ui_init_colors(void) {
 }
 
 void ui_init(
-    const char *title, unsigned line_count, unsigned file_count, bool warn
+    const char *title, unsigned line_count, unsigned file_count, bool warn,
+    bool reverse
 ) {
   ui.title = title;
+  ui.reverse = reverse;
   ui.status_bar_color = warn ? color_status_bar_warn : color_status_bar;
   ui.start_us = micros();
   ui.lines = malloc(sizeof(*(ui.lines)) * line_count);
@@ -101,17 +94,7 @@ void ui_close(void) {
 void ui_free(void) {
   free(ui.lines);
   free(ui.files);
-  ui = (Ui){
-      .scroll_offset = 0,
-      .highlighted = 0,
-      .status_bar_color = color_status_bar,
-      .title = "",
-      .start_us = 0,
-      .line_count = 0,
-      .lines = NULL,
-      .file_count = 0,
-      .files = NULL,
-  };
+  ui = (Ui){0};
 }
 
 #define ui_line_x_offset(line)                                                 \
@@ -147,7 +130,8 @@ void ui_add_line(
     file->line_count++;
     file->height += height;
   }
-  const bool select = line->origin != ' ' && file->status != '?';
+  const bool select =
+      !ui.reverse && (line->origin != ' ' && file->status != '?');
   *entry = (UiLine){
       .selected = select ? selected_full : selected_not,
       .highlighted = ui.line_count == 1,
@@ -207,6 +191,9 @@ void ui_update_status_bar(void) {
   }
   move(0, 0);
   clrtoeol();
+  if (ui.reverse) {
+    addch('-');
+  }
   mvaddstr(0, 1, ui.title);
   if (available <= 0) {
     return;

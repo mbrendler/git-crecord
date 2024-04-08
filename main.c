@@ -13,6 +13,7 @@
   }
 
 typedef struct {
+  Options options;
   git_repository *repo;
   git_diff *diff;
   unsigned file_count;
@@ -123,18 +124,16 @@ int diff_print(
     const git_diff_delta *delta, const git_diff_hunk *hunk,
     const git_diff_line *line, void *payload
 ) {
-  DiffPrintPayload *diff_print_payload = payload;
+  DiffPrintPayload *context = payload;
 
-  if (ignore_diff_line(
-          delta->new_file.path, line, &diff_print_payload->file_selection
-      )) {
+  if (ignore_diff_line(delta->new_file.path, line, &context->file_selection)) {
     return 0;
   }
 
-  FILE *stream = diff_print_payload->stream;
-  const UiLine *ui_line = ui.lines + diff_print_payload->line_index;
+  FILE *stream = context->stream;
+  const UiLine *ui_line = ui.lines + context->line_index;
   if (line->origin == 'H') {
-    diff_print_payload->hunk_selected = !!ui_line->selected;
+    context->hunk_selected = !!ui_line->selected;
     if (ui_line->selected) {
       const int new_lines = count_new_lines_of_hunk(ui_line, hunk);
       fprintf(
@@ -143,10 +142,20 @@ int diff_print(
       );
     }
   } else if (line->origin == 'F') {
-    if (ui_line->selected) {
+    if (context->file_selection.program->options.reverse &&
+        delta->status == GIT_DELTA_ADDED &&
+        ui_line->selected == selected_part) {
+      fprintf(
+          stream, "diff --git a/%s b/%s\n", delta->old_file.path,
+          delta->new_file.path
+      );
+      fprintf(stream, "index 0000000..%06x\n", delta->new_file.mode);
+      fprintf(stream, "--- a/%s\n", delta->old_file.path);
+      fprintf(stream, "+++ b/%s\n", delta->new_file.path);
+    } else if (ui_line->selected) {
       fwrite(line->content, sizeof(*line->content), line->content_len, stream);
     }
-  } else if (diff_print_payload->hunk_selected) {
+  } else if (context->hunk_selected) {
     if (ui_line->selected || line->origin == ' ') {
       fputc(line->origin, stream);
       fwrite(line->content, sizeof(*line->content), line->content_len, stream);
@@ -155,7 +164,7 @@ int diff_print(
       fwrite(line->content, sizeof(*line->content), line->content_len, stream);
     }
   }
-  diff_print_payload->line_index++;
+  context->line_index++;
   return 0;
 }
 
@@ -163,7 +172,7 @@ int main(int argc, char *argv[]) {
   atexit(ui_close);
 
   Options options = options_parse(argc, argv);
-  Program program = {0};
+  Program program = {.options = options, 0};
 
   git_libgit2_init();
   e(git_repository_open_ext(&program.repo, ".", 0, NULL));
@@ -174,14 +183,34 @@ int main(int argc, char *argv[]) {
   }
 
   git_diff_options diff_options = GIT_DIFF_OPTIONS_INIT;
+  /* diff_options.flags |= GIT_DIFF_INCLUDE_TYPECHANGE |
+   * GIT_DIFF_SHOW_UNMODIFIED; */
 
   if (options.untracked_files) {
     diff_options.flags |= GIT_DIFF_INCLUDE_UNTRACKED |
                           GIT_DIFF_RECURSE_UNTRACKED_DIRS |
                           GIT_DIFF_SHOW_UNTRACKED_CONTENT;
   }
-  e(git_diff_index_to_workdir(&program.diff, program.repo, NULL, &diff_options)
-  );
+  if (options.reverse) {
+    git_reference *head_ref = NULL;
+    git_object *head_obj = NULL;
+    git_tree *head_tree = NULL;
+
+    e(git_repository_head(&head_ref, program.repo))
+        e(git_reference_peel(&head_obj, head_ref, GIT_OBJ_COMMIT));
+    e(git_commit_tree(&head_tree, (git_commit *)head_obj));
+    e(git_diff_tree_to_index(
+        &program.diff, program.repo, head_tree, NULL, &diff_options
+    ));
+
+    git_reference_free(head_ref);
+    git_object_free(head_obj);
+    git_tree_free(head_tree);
+  } else {
+    e(git_diff_index_to_workdir(
+        &program.diff, program.repo, NULL, &diff_options
+    ));
+  }
 
   e(git_diff_print(
       program.diff, GIT_DIFF_FORMAT_PATCH, diff_count_number_of_lines, &program
@@ -197,7 +226,8 @@ int main(int argc, char *argv[]) {
   const char *branch = git_reference_shorthand(head);
   ui_init(
       branch, program.line_count, program.file_count,
-      strcmp(branch, "main") == 0 || strcmp(branch, "master") == 0
+      strcmp(branch, "main") == 0 || strcmp(branch, "master") == 0,
+      options.reverse
   );
 
   {
@@ -230,8 +260,13 @@ int main(int argc, char *argv[]) {
   }
   case 's':
   case 'c': {
-    FILE *stage_command_stream =
-        popen("git apply --cached --unidiff-zero -", "w");
+    const char *stage_command;
+    if (options.reverse) {
+      stage_command = "git apply -R --cached --unidiff-zero -";
+    } else {
+      stage_command = "git apply --cached --unidiff-zero -";
+    }
+    FILE *stage_command_stream = popen(stage_command, "w");
     DiffPrintPayload context = {
         0, false, {false, 0, &program}, stage_command_stream};
     e(git_diff_print(program.diff, GIT_DIFF_FORMAT_PATCH, diff_print, &context)

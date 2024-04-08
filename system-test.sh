@@ -187,7 +187,7 @@ echo "test unstage ------------------------------------------------------------"
 echo new line1 > new.txt
 echo new line2 >> new.txt
 git add new.txt
-run-git-crecord-reverse 'j k lj Gkljj s'
+run-git-crecord-reverse 'Aj k lj Gkljj s'
 assert-status 'MM a_file.txt
 M  b_file.txt
 AM new.txt
