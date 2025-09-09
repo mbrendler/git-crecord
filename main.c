@@ -222,8 +222,8 @@ int main(int argc, char *argv[]) {
   }
 
   git_reference *head = NULL;
-  e(git_repository_head(&head, program.repo));
-  const char *branch = git_reference_shorthand(head);
+  git_repository_head(&head, program.repo);
+  const char *branch = head ? git_reference_shorthand(head) : "---";
   ui_init(
       branch, program.line_count, program.file_count,
       strcmp(branch, "main") == 0 || strcmp(branch, "master") == 0,
@@ -268,7 +268,8 @@ int main(int argc, char *argv[]) {
     }
     FILE *stage_command_stream = popen(stage_command, "w");
     DiffPrintPayload context = {
-        0, false, {false, 0, &program}, stage_command_stream};
+        0, false, {false, 0, &program}, stage_command_stream
+    };
     e(git_diff_print(program.diff, GIT_DIFF_FORMAT_PATCH, diff_print, &context)
     );
     if (options.untracked_files) {
@@ -288,7 +289,9 @@ int main(int argc, char *argv[]) {
 
   ui_free();
 
-  git_reference_free(head);
+  if (head) {
+    git_reference_free(head);
+  }
   git_diff_free(program.diff);
 
   git_repository_free(program.repo);
