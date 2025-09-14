@@ -4,7 +4,7 @@
 export LIBRARY_PATH=/opt/homebrew/opt/libgit2/lib
 export C_INCLUDE_PATH=/opt/homebrew/opt/libgit2/include
 
-cc -g -std=c2x -Werror -Wall -Wpedantic -O3 -o git-crecord \
+cc -g -std=c2x -Werror -Wall -Wextra -Wpedantic -O3 -o git-crecord \
   main.c \
   -lgit2 \
   -lncurses

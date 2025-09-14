@@ -57,6 +57,8 @@ int diff_count_number_of_lines(
     const git_diff_delta *delta, const git_diff_hunk *hunk,
     const git_diff_line *line, void *payload
 ) {
+  (void)delta;
+  (void)hunk;
   Program *program = payload;
   if (line) {
     program->line_count++;
@@ -87,6 +89,7 @@ int diff_build_ui(
     const git_diff_delta *delta, const git_diff_hunk *hunk,
     const git_diff_line *line, void *payload
 ) {
+  (void)hunk;
   FileSelectionPayload *context = payload;
   if (!ignore_diff_line(delta->new_file.path, line, payload)) {
     ui_add_line(line, delta, context->last_file_status);
@@ -182,7 +185,10 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-field-initializers"
   git_diff_options diff_options = GIT_DIFF_OPTIONS_INIT;
+#pragma clang diagnostic pop
   /* diff_options.flags |= GIT_DIFF_INCLUDE_TYPECHANGE |
    * GIT_DIFF_SHOW_UNMODIFIED; */
 
