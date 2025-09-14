@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+
 #include <git2.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -185,10 +187,10 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmissing-field-initializers"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
   git_diff_options diff_options = GIT_DIFF_OPTIONS_INIT;
-#pragma clang diagnostic pop
+#pragma GCC diagnostic pop
   /* diff_options.flags |= GIT_DIFF_INCLUDE_TYPECHANGE |
    * GIT_DIFF_SHOW_UNMODIFIED; */
 
