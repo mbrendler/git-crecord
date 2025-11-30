@@ -1,14 +1,22 @@
 # git-crecord
 
-Inspired by crecord mercurial extension, git-crecord is an easy way to
-commit/stage git changes partially.
+Stage and commit git changes partially.
 
 ![Screenshot](/screenshot.jpg?raw=true)
 
-## Installation
+## Build
+
+Install dependencies:
 
 ```shell
-$ gem install git-crecord
+$ apt install gcc libgit2-dev libncurses-dev   # Debian/Ubuntu
+$ brew install libgit2                         # macOS
+```
+
+Build:
+
+```shell
+$ build.sh
 ```
 
 ## Usage
@@ -20,6 +28,7 @@ $ git crecord --reverse          # unstage hunks
 ```
 
 Key-bindings:
+
 ```
   q      - quit
   s      - stage selection and quit
@@ -39,23 +48,14 @@ Key-bindings:
   R      - force redraw
 ```
 
-## Configuration
+## Run tests
 
 ```shell
-# configure tab-width to four spaces, default is two spaces:
-$ git config --global crecord.tabwidth 4
-```
-
-## Development
-
-```shell
-$ git clone https://github.com/mbrendler/git-crecord
-$ cd git-crecord
-$ bundle install
-$ ln -s bin/git-crecord /usr/bin/git-crecord
+$ apt install git
 ```
 
 Tests:
+
 ```shell
-$ bundle exec rake
+$ ./system-test.sh
 ```
